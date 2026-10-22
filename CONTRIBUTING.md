@@ -115,7 +115,9 @@ This guide tells you how to claim tasks (issues), how to pick up work, the exact
 ### 领取任务（Issue）
 
 - 在 GitHub Issues 中查找任务。如果你对一些内容有兴趣，想讲的话，也可以选择提出一个新的 issue。我们会查看并决定是否采纳。
-- 领取任务：在 issue 页面点击 "Assign yourself"（如果可用），或在评论中写明你将承担此任务。主动 assign 且最终完成结果良好，将获得 +5 CPU 技术部积分（最终 PR 合并后计分），被动 assign 最终完成后将获得 +3 分。
+
+- 领取任务：在 issue 页面点击 "Assign yourself"（如果可用），或在评论中写明你将承担此任务。如果最终顺利完成周常分享且表现良好，可以获得8分技术部积分
+
 - 我们使用 Milestone 进行排期。若属于你的 issue 已设置里程碑，请注意要按时补全课程详细内容；若需要排期，请在 issue 中 comment 请求。
 
 ### 贡献流程（逐步）
