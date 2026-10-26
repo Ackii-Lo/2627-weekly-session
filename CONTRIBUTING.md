@@ -11,7 +11,7 @@ This guide tells you how to claim tasks (issues), how to pick up work, the exact
 ### Repository summary
 
 - Repository: `2627-weekly-session`
-- Purpose: Collect and maintain session schedules, notes, and materials for 2627 Weekly Session. All course material files are stored in `Contents/` (organized by individual course); `Routes/` provides routing guidance documents for each weekly session (organized by session).
+- Purpose: Collect and maintain session schedules, notes, and materials for 2627 Weekly Session. All session material files are stored in `Contents/`.
 
 ### Claiming tasks (Issue pickup)
 
@@ -110,7 +110,7 @@ This guide tells you how to claim tasks (issues), how to pick up work, the exact
 ### 仓库摘要
 
 - 仓库：`2627-weekly-session`
-- 用途: 保存并维护 2627 Weekly Session 系列的周常日程、材料与笔记。所有课程材料文件放在 `Contents/` (按照每单个课程整理)；`Routes/` 提供每次周常的路由指导文档（按照每次周常整理）。
+- 用途: 保存并维护 2627 Weekly Session 系列的周常日程、材料与笔记。所有课程材料文件放在 `Contents/` 中。
 
 ### 领取任务（Issue）
 

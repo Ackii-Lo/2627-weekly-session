@@ -7,12 +7,11 @@
 ### Repository overview
 
 - Name: 2627-weekly-session
-- Purpose: a community-maintained collection of session materials, schedules, and notes for the 2627 Weekly Session Series. All course material files are stored in `Contents/` (organized by individual course); `Routes/` provides routing guidance documents for each weekly session (organized by session).
+- Purpose: a community-maintained collection of session materials, schedules, and notes for the 2627 Weekly Session Series. All session material files are stored in `Contents/`.
 
 ### Repository structure
 
-- [Contents/](./Contents/) — All course material files are stored in `Contents/` (organized by individual course). Add or edit course files under the appropriate `Contents/<your-course>/` directory.
-- [Routes/](./Routes/) — Provides routing guidance documents for each weekly session (organized by session). `Routes/` is the published routing tree; usually content maintainers should not edit `Routes/` directly — change the content in `Contents/` instead.
+- [Contents/](./Contents/) — All session material files are stored here, organized by session. Add or edit course files under the appropriate `Contents/<your-course>/` directory.
 
 ### Quick start (fork + local preview)
 
@@ -36,12 +35,11 @@ See `CONTRIBUTING.md` for details and examples.
 ### 仓库概述
 
 - 名称: 2627-weekly-session
-- 目的: 保存并维护 2627 Weekly Session 系列的会议材料、日程和笔记。仓库中的源文件保存在 `Contents/` 中，按照每一个小课程区分组织，`Routes/` 按照 Session 组织存放每个 Session 的概要。
+- 目的: 保存并维护 2627 Weekly Session 系列的会议材料、日程和笔记。所有文件都保存在 `Contents/` 中。
 
 ### 仓库结构
 
-- [Contents/](./Contents/) — 课程内容文件。请在此目录的课程子目录新增或修改所有会议材料（Markdown、图片、附件）。
-- [Routes/](./Routes/) — 对外展示的结构。单个课程编辑者通常不要直接修改 `Routes/`，请在 `Contents/` 修改内容。
+- [Contents/](./Contents/) — 课程内容文件，按照每次周常（Session）组织。请在此目录的课程子目录新增或修改所有会议材料（Markdown、图片、附件）。
 
 ### 快速使用（Fork + 本地预览）
 
