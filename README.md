@@ -11,7 +11,7 @@
 
 ### Repository structure
 
-- [Contents/](./Contents/) — All session material files are stored here, organized by session. Add or edit course files under the appropriate `Contents/<your-course>/` directory, named `S<NN>-<YYYYMMDD>-<CourseName>` (e.g. `S01-20261023-Markdown`).
+- [Contents/](./Contents/) — All session material files are stored here, organized by session. Add or edit course files under the appropriate `Contents/<your-course>/` directory, named `S<NN>-<YYYYMMDD>-<CourseName>` (e.g. `S01-20261023-Markdown`). Standalone course repositories may be included as submodules, with the folder named the same way.
 
 ### Quick start (fork + local preview)
 
@@ -39,7 +39,7 @@ See `CONTRIBUTING.md` for details and examples.
 
 ### 仓库结构
 
-- [Contents/](./Contents/) — 课程内容文件，按照每次周常（Session）组织。请在此目录的课程子目录新增或修改所有会议材料（Markdown、图片、附件），子目录命名为 `S<编号>-<日期>-<课程名>`（例如 `S01-20261023-Markdown`）。
+- [Contents/](./Contents/) — 课程内容文件，按照每次周常（Session）组织。请在此目录的课程子目录新增或修改所有会议材料（Markdown、图片、附件），子目录命名为 `S<编号>-<日期>-<课程名>`（例如 `S01-20261023-Markdown`）。独立课程仓库可以作为 submodule 引入，文件夹命名同样遵循该规范。
 
 ### 快速使用（Fork + 本地预览）
 

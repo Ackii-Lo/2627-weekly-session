@@ -37,6 +37,7 @@ This guide tells you how to propose a weekly session sharing topic (via issues),
    - Session materials, images, and related assets must be placed under `Contents/<your-course>`.
    - In `Contents/<your-course>` add a `README.md` that describes the course outline and goals.
    - Folder naming: `S<NN>-<YYYYMMDD>-<CourseName>`, where `<NN>` is the two-digit weekly session number, `<YYYYMMDD>` is the session date, and `<CourseName>` is the course name in PascalCase, e.g. `S01-20261023-Markdown`.
+   - Standalone course repositories may be included as submodules; when adding one, specify the target path so the folder still follows the same convention: `git submodule add <repo-url> Contents/S<NN>-<YYYYMMDD>-<CourseName>`.
    - Use lowercase, kebab-case filenames for individual files, e.g. `vscode-lecture.md`.
    - If you have images, put them in `Contents/<your-course>/images/` and reference them from your markdown.
 
@@ -137,6 +138,7 @@ This guide tells you how to propose a weekly session sharing topic (via issues),
    - 会话材料、图片等都应该放在 `Contents/<你的课程>` 下。
    - 在 `Contents/<你的课程>` 添加一个 `README.md` 介绍课程大纲和目标。
    - 文件夹命名：`S<编号>-<日期>-<课程名>`，其中编号为两位数的周常序号，日期格式为 `YYYYMMDD`，课程名使用大驼峰（PascalCase），例如 `S01-20261023-Markdown`。
+   - 独立的课程仓库可以作为 submodule 引入；引入时请指定目标路径，使文件夹命名依然符合上述规范：`git submodule add <仓库地址> Contents/S<编号>-<日期>-<课程名>`。
    - 其他文件名建议使用小写与中横线，例如 `vscode-lecture.md`。
    - 如有图片，放在 `Contents/<你的课程>/images/`，然后在你的 markdown 中引用即可。
 
