@@ -6,18 +6,17 @@
 
 Welcome — thank you for contributing to the 2627-weekly-session repository.
 
-This guide tells you how to claim tasks (issues), how to pick up work, the exact contribution workflow (fork, branch, edit, PR), the scoring rule for assigning issues, and repository structure information.
+This guide tells you how to propose a weekly session sharing topic (via issues), the exact contribution workflow (fork, branch, edit, PR), the scoring rules, and repository structure information.
 
 ### Repository summary
 
 - Repository: `2627-weekly-session`
 - Purpose: Collect and maintain session schedules, notes, and materials for 2627 Weekly Session. All session material files are stored in `Contents/`.
 
-### Claiming tasks (Issue pickup)
+### Proposing a weekly session sharing (Issue)
 
-- Browse the repository Issues on GitHub. If you're interested in contributing a talk or new material, you may also open a new issue proposing the idea; maintainers will review and decide whether to accept it.
-- To claim a task, click "Assign yourself" on the issue (if available), or add a comment like "I will take this". Actively assigning yourself is encouraged and awards +5 CPU Tech Team points when the implementing PR is merged. If you are assigned by maintainers, that counts as +3 points.
-- We use GitHub Milestones to schedule and prioritize work. If a milestone is added to the issue in which you are assigned, please note the deadline and complete course materials on time. If you want your issue to be scheduled, please request it in the issue comment.
+- If you are interested in a topic and would like to give a talk, open a new issue on GitHub proposing the weekly session sharing; maintainers will review and decide whether to accept it.
+- We use GitHub Milestones to schedule and prioritize weekly sessions. If a milestone is added to your issue, please note the deadline and complete your sharing materials on time. If you want your sharing to be scheduled, please request it in the issue comment.
 
 ### Contribution process (step-by-step)
 
@@ -37,7 +36,7 @@ This guide tells you how to claim tasks (issues), how to pick up work, the exact
 
    - Session materials, images, and related assets must be placed under `Contents/<your-course>`.
    - In `Contents/<your-course>` add a `README.md` that describes the course outline and goals.
-   - Folder naming: use PascalCase for directories under `Contents/`, e.g. `LinearAlgebra`, `MachineLearning`.
+   - Folder naming: `S<NN>-<YYYYMMDD>-<CourseName>`, where `<NN>` is the two-digit weekly session number, `<YYYYMMDD>` is the session date, and `<CourseName>` is the course name in PascalCase, e.g. `S01-20261023-Markdown`.
    - Use lowercase, kebab-case filenames for individual files, e.g. `vscode-lecture.md`.
    - If you have images, put them in `Contents/<your-course>/images/` and reference them from your markdown.
 
@@ -86,7 +85,7 @@ This guide tells you how to claim tasks (issues), how to pick up work, the exact
 
 ### PR checklist (what reviewers will look for)
 
-- Are changes limited to the scope of the issue?
+- Are changes limited to the scope of the corresponding weekly session sharing?
 - Are new files placed under `Contents/` with reasonable names?
 - Are images stored under `Contents/<...>/images` with reasonable sizes?
 - No secrets or sensitive data included.
@@ -94,31 +93,30 @@ This guide tells you how to claim tasks (issues), how to pick up work, the exact
 
 ### Scoring & incentives
 
-- Claiming (assigning) an issue: +5 points (counted when a merged PR implements the issue).
-- Being assigned an issue by us: +3 points (same counting).
+- Proposing a tech-sharing issue that gets accepted: +3 points (counted after the corresponding weekly session ends).
+- Submitting a PR -> PR merged -> delivering the corresponding tech sharing: +5 points (counted after the corresponding weekly session ends).
 
 ### Maintainer contact
 
+- [oxoxox-oxox](https://github.com/oxoxox-oxox) [jiabaocao5@gmail.com](mailto:jiabaocao5@gmail.com)
 - [Robert He](https://github.com/hnrobert) [hnrobert@qq.com](mailto:hnrobert@qq.com)
 
 ## zh-CN
 
 欢迎 — 感谢你为 2627-weekly-session 仓库做贡献。
 
-本文档描述如何领取任务（Issues）、如何贡献内容、分支命名、PR 工作流、以及我们如何统计指派奖励。请严格按照步骤操作，以便团队统一管理和审查。
+本文档描述如何提议周常分享（Issues）、如何贡献内容、分支命名、PR 工作流、以及加分规则。请严格按照步骤操作，以便团队统一管理和审查。
 
 ### 仓库摘要
 
 - 仓库：`2627-weekly-session`
 - 用途: 保存并维护 2627 Weekly Session 系列的周常日程、材料与笔记。所有课程材料文件放在 `Contents/` 中。
 
-### 领取任务（Issue）
+### 提议周常分享（Issue）
 
-- 在 GitHub Issues 中查找任务。如果你对一些内容有兴趣，想讲的话，也可以选择提出一个新的 issue。我们会查看并决定是否采纳。
+- 如果你对一些内容有兴趣，想讲的话，可以在 GitHub 上提出一个新的 issue 来提议这次周常分享。我们会查看并决定是否采纳。
 
-- 领取任务：在 issue 页面点击 "Assign yourself"（如果可用），或在评论中写明你将承担此任务。如果最终顺利完成周常分享且表现良好，可以获得8分技术部积分
-
-- 我们使用 Milestone 进行排期。若属于你的 issue 已设置里程碑，请注意要按时补全课程详细内容；若需要排期，请在 issue 中 comment 请求。
+- 我们使用 Milestone 进行排期。若你的 issue 已设置里程碑，请注意要按时补全周常分享的详细内容；若需要排期，请在 issue 中 comment 请求。
 
 ### 贡献流程（逐步）
 
@@ -138,7 +136,7 @@ This guide tells you how to claim tasks (issues), how to pick up work, the exact
 
    - 会话材料、图片等都应该放在 `Contents/<你的课程>` 下。
    - 在 `Contents/<你的课程>` 添加一个 `README.md` 介绍课程大纲和目标。
-   - 文件夹命名：`Contents/` 下的目录请使用大驼峰（PascalCase），例如 `LinearAlgebra`、`MachineLearning`。
+   - 文件夹命名：`S<编号>-<日期>-<课程名>`，其中编号为两位数的周常序号，日期格式为 `YYYYMMDD`，课程名使用大驼峰（PascalCase），例如 `S01-20261023-Markdown`。
    - 其他文件名建议使用小写与中横线，例如 `vscode-lecture.md`。
    - 如有图片，放在 `Contents/<你的课程>/images/`，然后在你的 markdown 中引用即可。
 
@@ -187,9 +185,10 @@ This guide tells you how to claim tasks (issues), how to pick up work, the exact
 
 ### 加分规则与激励
 
-- 积极 assign yourself 的 issue：+5 分（当实现该 issue 的 PR 合并后计分）。
-- 被我们 assign 的 issue：+3 分 (同上)
+- 提出一个技术分享的 issue 并被采纳：+3 分（对应一周周常结束后记分）。
+- 提出 pr -> pr 被 merge -> 完成对应的技术分享：+5 分（对应一周周常结束后记分）。
 
 ### 维护者联系方式
 
+- [oxoxox-oxox](https://github.com/oxoxox-oxox) [jiabaocao5@gmail.com](mailto:jiabaocao5@gmail.com)
 - [Robert He](https://github.com/hnrobert) [hnrobert@qq.com](mailto:hnrobert@qq.com)
