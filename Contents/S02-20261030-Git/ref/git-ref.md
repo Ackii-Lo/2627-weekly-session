@@ -1,0 +1,1268 @@
+我建议把这门课设计成一门 **“从问题出发，理解 Git 为什么存在、如何使用，以及它在底层如何工作”** 的课程，而不是传统的 Git 命令教学。
+
+面向计算机专业的同学，尤其是还没有系统接触过版本控制的学生，可以把课程分成三个层次：
+
+1. **Why：为什么需要 Git？** 从代码丢失、版本混乱、实验失败等真实问题出发，理解版本控制的设计动机。
+2. **How：如何用 Git 解决这些问题？** 介绍最核心的命令，但不把课程变成命令手册。
+3. **How it works：Git 为什么能做到这些？** 介绍快照、对象、哈希、提交历史和分支的底层机制，让同学们建立一个可迁移的心智模型。
+
+两个 Session 各 50 分钟，建议分别围绕两个问题展开：
+
+- **Session 1：Git 如何记录一个项目的历史？**
+- **Session 2：Git 如何管理分支、整合修改，并与 GitHub 协作？**
+
+课程可以使用一个贯穿始终的虚构项目，例如一个 Python 程序。通过几次修改、一次错误修改、一次功能开发和一次历史回溯，逐步引出 Git 的概念。
+
+---
+
+# 一、课程整体框架
+
+## 课程标题
+
+**Git Under the Hood: From Version Control to Distributed Collaboration**
+
+副标题：
+
+*Why Git Exists, How to Use It, and How It Works*
+
+如果希望更偏向学生、轻松一些，也可以使用：
+
+**Git Is More Than `git commit`**
+
+### 课程定位
+
+| 项目 | 设计 |
+| --- | --- |
+| 目标受众 | 了解基本编程，但没有系统学习过 Git 的大学生 |
+| 总时长 | 100 分钟，分为两个 50 分钟的 Session |
+| 核心目标 | 理解 Git 的设计动机、核心工作流和基本实现原理 |
+| 实践比例 | 约 15%–20%，以演示和预测结果为主 |
+| 教学方式 | 场景故事、可视化示例、命令演示、底层原理解释 |
+| 远程部分 | 使用 GitHub 解释 remote、push、fetch、pull，不涉及 PR、Issue 等社区功能 |
+
+### 学习目标
+
+完成课程后，同学们应该能够：
+
+1. 解释为什么手动备份和复制项目文件夹不是理想的版本管理方案。
+2. 理解 working tree、staging area 和 repository 之间的区别。
+3. 使用 `git status`、`git add`、`git commit`、`git log` 和 `git diff` 理解并管理本地历史。
+4. 理解 Git 的 commit、snapshot、hash 和 DAG 等基本概念。
+5. 解释 branch、merge 和冲突的基本含义。
+6. 理解 Git 与 GitHub 的关系，以及 `push`、`fetch` 和 `pull` 的基本作用。
+7. 对常见问题建立初步的诊断思路，而不只是记住命令。
+
+---
+
+# 二、Session 1：Git 如何记录一个项目的历史？
+
+**主题：From Saving Files to Building History**
+
+**时长：50 分钟**
+
+这一节应该把更多时间放在设计动机和 Git 的核心模型上。
+
+我不建议一开始就展示命令列表。先让学生理解：**我们为什么需要一种专门的工具来记录代码的变化？**
+
+## Part 1 — The Problem: What Does Version Control Actually Solve?（0–8 min）
+
+### 核心问题
+
+假设你正在开发一个 Python 项目。
+
+第一天，你写出了一个可以运行的版本。
+
+第二天，你增加了一个功能。
+
+第三天，你修改了一个算法，但程序开始出现 Bug。
+
+你会怎么做？
+
+可以先展示几种常见方案：
+
+```text
+project/
+├── main.py
+├── main_old.py
+├── main_new.py
+├── main_final.py
+├── main_final_v2.py
+└── main_final_really_final.py
+```
+
+这很有趣，但也揭示了几个实际问题：
+
+- **History：** 我们为什么修改了这段代码？
+- **Recovery：** 怎样回到某个确定的历史版本？
+- **Comparison：** 两个版本究竟有什么区别？
+- **Identity：** 哪个文件才是当前真正使用的版本？
+- **Experimentation：** 我想尝试一种新算法，但又不想破坏现有版本，怎么办？
+
+接下来可以展示另一种常见做法：把整个项目复制成多个文件夹。
+
+```text
+project_backup_1/
+project_backup_2/
+project_backup_before_refactor/
+project_backup_after_refactor/
+```
+
+虽然这样比复制单个文件更可靠，但仍然存在很多问题：
+
+- 不容易知道哪些文件发生了变化。
+- 不容易准确追踪每一次修改。
+- 不容易比较两个版本之间的差异。
+- 随着项目规模扩大，备份会越来越笨重。
+- 不同版本之间的关系并不清晰。
+
+### 引出 Git 的设计动机
+
+Git 的目标不只是帮你保存文件。
+
+它还需要让你能够：
+
+- 记录项目的历史状态。
+- 追踪变化。
+- 定位历史版本。
+- 在不同开发方向之间切换。
+- 在不同的开发历史之间整合修改。
+
+**教学重点：版本控制的核心是管理变化和历史，而不只是备份文件。**
+
+可以顺带介绍 Git 的历史背景：Git 最初由 Linus Torvalds 于 2005 年开发，用于支持 Linux 内核开发。这个背景可以自然引出后面两个设计特点：
+
+1. Git 需要高效地处理大型项目。
+2. Git 需要支持分布式开发，而不能只依赖一台中央服务器。
+
+这里先提出问题，不急着讲底层实现。
+
+---
+
+## Part 2 — Git's Mental Model: Three Places, Three Different Roles（8–20 min）
+
+这一部分介绍最重要的本地工作流。
+
+我建议把它作为整个课程中第一个需要学生真正理解的模型。
+
+### 2.1 三个核心区域
+
+Git 的基本工作流可以简化为三个区域：
+
+| 区域 | 作用 | 可以怎么理解 |
+| --- | --- | --- |
+| Working Tree | 当前实际编辑的项目文件 | 你的工作台 |
+| Staging Area / Index | 准备纳入下一次提交的内容 | 下一份提交的草稿 |
+| Local Repository | 已经保存的提交历史 | 项目的历史档案 |
+
+关键在于：**这三个区域不是同一个东西。**
+
+例如，你修改了 `main.py`，这不意味着修改已经被 Git 记录为一个提交。
+
+执行：
+
+```bash
+git status
+```
+
+可以查看当前工作区的状态，以及哪些变化尚未进入暂存区、哪些变化已经暂存。
+
+执行：
+
+```bash
+git add main.py
+```
+
+是把 `main.py` 当前的内容纳入暂存区。
+
+执行：
+
+```bash
+git commit -m "Add input validation"
+```
+
+则是根据暂存区的内容创建一次提交。
+
+### 2.2 为什么要有 Staging Area？
+
+这里值得多花一点时间。
+
+假设你修改了三个文件：
+
+```text
+main.py
+parser.py
+README.md
+```
+
+其中：
+
+- `main.py` 修复了一个 Bug。
+- `parser.py` 增加了新功能。
+- `README.md` 只修改了格式。
+
+你希望先提交 Bug 修复，而不把另外两个修改放进去。
+
+如果没有暂存区，你可能需要手动复制文件、撤销部分修改，或者想办法把修改拆开。
+
+Git 的 staging area 允许你选择**下一次提交究竟包含哪些内容**。
+
+```bash
+git add main.py
+git commit -m "Fix input validation"
+```
+
+注意，这并不是说其他文件的修改已经消失了。它们仍然可以留在工作区，等待后续处理。
+
+如果需要更细粒度的控制，还可以使用：
+
+```bash
+git add -p
+```
+
+它允许你交互式地选择文件中的部分修改。
+
+在这里不需要实际演示所有操作，只需要让学生理解：暂存区不是多余的中间步骤，而是一个有意设计的提交边界。
+
+### 2.3 用一个具体例子验证理解
+
+假设 `main.py` 原本是：
+
+```python
+print("Hello")
+```
+
+你把它改成：
+
+```python
+print("Hello, Git")
+```
+
+然后执行：
+
+```bash
+git add main.py
+```
+
+之后，你又把文件改成：
+
+```python
+print("Hello, Git!")
+```
+
+最后执行：
+
+```bash
+git commit -m "Update greeting"
+```
+
+问题是：提交里会是什么内容？
+
+**答案是：**
+
+```python
+print("Hello, Git")
+```
+
+因为 `git add` 已经将当时的文件内容纳入暂存区，之后的修改不会自动更新暂存区。
+
+这非常适合做一次简短的互动提问。
+
+它能直接帮助学生理解为什么 Git 中的 `add` 和 `commit` 是两个独立步骤。
+
+### 本部分的核心结论
+
+```text
+Edit → Stage → Commit
+```
+
+它们分别对应：
+
+```text
+修改文件 → 选择提交内容 → 创建历史记录
+```
+
+建议让学生把这个模型记住，而不是先记住十几个命令。
+
+---
+
+## Part 3 — What Is a Commit, Really?（20–32 min）
+
+这一部分从使用方式进入 Git 的底层设计。
+
+先问学生一个问题：
+
+> 当你执行 `git commit` 时，Git 究竟保存了什么？
+
+很多初学者会认为 Git 主要记录每一次修改的操作，例如：
+
+```text
+1. 在第 3 行增加一个函数
+2. 删除第 5 行
+3. 修改变量名
+```
+
+但 Git 的核心模型并不是简单地把每一次编辑操作记录下来。
+
+### 3.1 Git 主要使用快照模型
+
+Git 的提交描述的是项目在某个时刻的状态。
+
+例如：
+
+```text
+Commit A
+main.py
+utils.py
+README.md
+```
+
+随后你修改了 `main.py`，并创建了新的提交：
+
+```text
+Commit B
+main.py
+utils.py
+README.md
+```
+
+从概念上看，A 和 B 分别描述了两个项目状态。
+
+Git 会通过内部对象和引用来组织这些状态，而不是把整个项目当成一份互不相关的备份。
+
+更准确地说，**每个 commit 指向一个代表项目目录结构的 tree；tree 再指向文件内容对应的 blob 或其他 tree。**
+
+Git 使用这些对象来组织文件、目录和提交历史。
+
+### 3.2 Git 如何避免重复存储？
+
+假设一个项目有 100 个文件，你只修改了其中 1 个。
+
+如果每次提交都完整复制整个项目，那么历史记录很容易变得庞大。
+
+Git 通过内容寻址的对象存储和对象复用来减少不必要的重复。
+
+例如：
+
+```text
+Commit A
+├── main.py ────── Blob X
+├── utils.py ───── Blob Y
+└── README.md ──── Blob Z
+
+Commit B
+├── main.py ────── Blob X'
+├── utils.py ───── Blob Y
+└── README.md ──── Blob Z
+```
+
+其中：
+
+- `main.py` 被修改了，因此对应的内容对象发生变化。
+- `utils.py` 和 `README.md` 的内容没有变化，可以继续引用原来的对象。
+
+这个图是概念示意，不代表 Git 的全部存储细节。
+
+另外，Git 也会使用压缩和 packfile 等机制来提高存储效率。不要把“快照模型”理解为“每个 commit 都复制一份完整项目”。
+
+### 3.3 为什么 Git 要使用 Hash？
+
+Git 的对象通过内容计算得到的哈希标识进行寻址。
+
+概念上可以理解为：
+
+```text
+Object Content
+      │
+      ▼
+   Hash Function
+      │
+      ▼
+Object ID
+```
+
+在传统 SHA-1 仓库中，对象 ID 通常显示为 40 位十六进制字符串；Git 也支持使用 SHA-256 的仓库格式。
+
+使用哈希标识有几个好处：
+
+- **Content addressing：** 可以根据内容计算出对象标识。
+- **Integrity checking：** 内容发生变化时，对应的标识通常也会发生变化。
+- **Object reuse：** 相同内容可以复用相同的对象。
+- **History identification：** 可以通过提交 ID 定位特定提交。
+
+不过，哈希并不意味着绝对安全。SHA-1 已存在碰撞攻击方面的弱点，因此不应把它当作抵御恶意篡改的绝对保证。
+
+这里也可以顺带解释为什么 Git 的提交 ID 不是简单的自增数字：
+
+```text
+Commit 1
+Commit 2
+Commit 3
+```
+
+这种编号需要依赖一个统一的分配顺序。
+
+Git 的对象标识则来自内容本身，因此不需要中央服务器为每个对象分配唯一编号。
+
+### 3.4 Commit 不只是文件内容
+
+一个 Git commit 还包含：
+
+- 指向根 tree 的引用。
+- 父提交的引用。
+- 作者和提交者信息。
+- 时间信息。
+- 提交说明。
+
+这就引出了下一部分：Git 不仅可以保存项目状态，还能组织项目的历史。
+
+---
+
+## Part 4 — History Is a Graph, Not Just a List（32–42 min）
+
+这一部分是理解分支的基础。
+
+先展示一条最简单的提交历史：
+
+```text
+A → B → C → D
+```
+
+初学者可能会把 Git 的历史理解成一条不断向前延伸的列表。
+
+但实际情况更加灵活。
+
+### 4.1 Commit 如何连接起来？
+
+每个普通提交都可以记录自己的父提交。
+
+例如：
+
+```text
+A ← B ← C
+```
+
+这里的箭头可以理解为：B 的父提交是 A，C 的父提交是 B。
+
+当项目持续开发时，Git 就形成了由提交对象连接起来的历史结构。
+
+更准确地说，它是一个有向无环图（DAG，Directed Acyclic Graph）。
+
+为什么不是简单的链表？
+
+因为一旦引入分支，就可能出现不同的开发路径；当这些路径被合并时，一个提交还可能拥有多个父提交。
+
+### 4.2 Git 如何知道当前在哪个版本？
+
+Git 使用引用（references）来标记特定的提交。
+
+例如：
+
+```text
+main ──► C
+```
+
+`main` 是一个指向提交 C 的分支引用。
+
+当你在 `main` 上创建新提交 D 时，分支引用会移动到 D：
+
+```text
+main ──► D
+
+A → B → C → D
+```
+
+这也是 Git 中分支非常轻量的原因之一。
+
+分支并不是把整个项目复制一份，而是一个指向提交的可移动引用。
+
+### 4.3 HEAD 是什么？
+
+`HEAD` 表示当前检出的版本位置，通常通过当前分支引用间接指向一个提交。
+
+例如：
+
+```text
+HEAD
+ │
+ ▼
+main
+ │
+ ▼
+Commit D
+```
+
+如果你切换到另一个分支，`HEAD` 的位置也会随之改变。
+
+这里可以只介绍概念，不必深入 detached HEAD 等特殊状态。
+
+### Session 1 核心结论
+
+Git 的历史不是一个只能向前推进的版本编号列表，而是一个由提交对象连接起来的图。
+
+理解这一点，分支和合并就不再是独立的神秘功能。
+
+---
+
+## Part 5 — Live Demo: Read the History（42–48 min）
+
+这里安排一次短演示即可。
+
+不需要让所有同学自己敲一遍命令。
+
+准备一个已经有几次提交的示例仓库，演示以下操作：
+
+```bash
+git status
+git diff
+git log --oneline --graph --decorate
+```
+
+分别说明：
+
+| 命令 | 需要回答的问题 |
+| --- | --- |
+| `git status` | 当前有哪些尚未提交的变化？ |
+| `git diff` | 工作区中的修改具体是什么？ |
+| `git log` | 历史中有哪些提交？ |
+| `git log --graph` | 历史结构是什么样的？ |
+
+如果还有时间，可以补充：
+
+```bash
+git diff --staged
+```
+
+它用于查看暂存区中的修改与当前 `HEAD` 所指提交之间的差异。
+
+重点不是记住命令，而是让学生看到前面介绍的模型如何对应到真实工具。
+
+---
+
+## Part 6 — Recap（48–50 min）
+
+用三个问题结束第一节：
+
+1. 为什么 `git add` 和 `git commit` 是两个不同的步骤？
+2. Git 的 commit 是不是一份完整、独立的项目复制品？
+3. 为什么 Git 的历史可以用图来描述？
+
+最后用一句话收束：
+
+> Git records snapshots, connects them into history, and gives us ways to navigate that history.
+
+第一节结束后，学生应该已经建立起 Git 的基本心智模型。
+
+---
+
+# 三、Session 2：Git 如何管理分支、整合修改，并与 GitHub 协作？
+
+**主题：From Branches to Distributed Collaboration**
+
+**时长：50 分钟**
+
+第二节建议从一个实际的开发需求出发：
+
+> 你已经有一个可以运行的版本。现在，你想尝试一种新算法，但不想破坏现有代码。
+
+由此自然引出 branch、merge、冲突，以及 remote。
+
+## Part 1 — Why Do We Need Branches?（0–8 min）
+
+### 1.1 没有分支会发生什么？
+
+假设项目历史如下：
+
+```text
+A → B → C
+```
+
+现在你想增加一个新功能。
+
+一种方法是在当前版本上直接修改：
+
+```text
+A → B → C → D
+```
+
+但如果你不确定这个功能能否成功，就会面临一个问题：
+
+**如何在保留现有稳定版本的同时，安全地尝试新方案？**
+
+如果每次尝试都复制整个项目，会出现之前讨论过的问题。
+
+Git 的分支允许你在现有历史基础上创建另一条开发路径。
+
+### 1.2 Branch 是什么？
+
+例如：
+
+```text
+        D → E  feature
+       /
+A → B → C
+       \
+        main
+```
+
+这个图表示：
+
+- `main` 仍然指向 C。
+- `feature` 指向 E。
+- 两个分支共享之前的历史，但后续提交可以不同。
+
+分支的重点是：**允许不同的开发路径独立推进，而不必复制整个仓库。**
+
+### 1.3 用最少的命令介绍分支
+
+```bash
+git branch feature
+git switch feature
+```
+
+第一条命令创建 `feature` 分支，第二条命令切换到该分支。
+
+也可以直接执行：
+
+```bash
+git switch -c feature
+```
+
+它会创建并切换到新分支。
+
+这里可以解释一个容易被误解的地方：
+
+**创建分支本身不会创建一个新的提交，也不会立即复制一份项目。**
+
+它主要是在 Git 中创建一个新的分支引用。
+
+可以把这看作一个非常轻量的操作。
+
+---
+
+## Part 2 — Merge: How Do We Bring Histories Together?（8–20 min）
+
+分支解决了独立开发的问题，但当功能开发完成后，我们往往需要把修改整合起来。
+
+这就引出了 merge。
+
+### 2.1 一个简单的合并场景
+
+假设：
+
+```text
+A → B → C → D
+          \
+           E → F
+```
+
+其中：
+
+- `main` 指向 D。
+- `feature` 指向 F。
+- C 是两个分支的共同祖先。
+
+现在你希望把 `feature` 的开发成果合并到 `main`。
+
+Git 会根据提交历史和文件内容来判断如何完成整合。
+
+### 2.2 Fast-forward 与三方合并
+
+可以介绍两种常见情况。
+
+**情况 A：Fast-forward**
+
+假设 `main` 仍然指向 C，而 `feature` 已经前进到 F：
+
+```text
+A → B → C → D → E
+          main   feature
+```
+
+当切换到 `main` 并合并 `feature` 时，如果 `main` 没有独立的新提交，Git 可以直接把 `main` 引用移动到 E。
+
+这就是 fast-forward。
+
+它不需要创建新的合并提交。
+
+**情况 B：Three-way merge**
+
+如果 `main` 和 `feature` 都产生了独立提交：
+
+```text
+        D ───────┐
+       /         │
+A → B → C        M
+       \         │
+        E ───────┘
+```
+
+Git 可以使用三个版本进行合并：
+
+1. 共同祖先 C。
+2. `main` 上的版本 D。
+3. `feature` 上的版本 E。
+
+这就是三方合并的基本思路。
+
+Git 不只是把两个文件直接拼在一起，而是利用共同祖先和两个分支的变化来尝试整合修改。
+
+### 2.3 为什么会发生 Merge Conflict？
+
+现在假设两个分支都修改了同一个函数：
+
+```python
+def calculate_price(price):
+    return price * 1.0
+```
+
+`main` 修改为：
+
+```python
+def calculate_price(price):
+    return price * 1.1
+```
+
+`feature` 修改为：
+
+```python
+def calculate_price(price):
+    return price * 1.2
+```
+
+Git 无法确定开发者究竟希望采用哪一种业务逻辑。
+
+因此，它可能产生冲突，需要开发者决定最终结果。
+
+关键点是：
+
+**冲突不一定意味着 Git 失效，而可能意味着 Git 缺乏足够的信息来判断开发者的真实意图。**
+
+Git 可以处理大量结构清晰、没有歧义的修改；但它无法仅凭代码差异理解所有业务语义。
+
+### 2.4 冲突是否只会发生在同一行？
+
+不一定。
+
+同一行的不同修改很容易产生冲突，但不同位置的修改也可能发生冲突。
+
+例如：
+
+- 一方删除了某个函数，另一方修改了这个函数。
+- 一方重命名文件，另一方修改了旧文件。
+- 一方修改了公共接口，另一方新增的代码依赖旧接口。
+
+这里可以把冲突理解为：**自动整合无法可靠地确定最终结果，需要人为介入。**
+
+---
+
+## Part 3 — Undo: Git Can Go Back, but What Does “Back” Mean?（20–30 min）
+
+这一部分很适合用来解释 Git 的历史模型有什么实际价值。
+
+学生可能会问：
+
+> 如果我提交了一次错误修改，能不能撤销？
+
+答案是可以，但不同的撤销操作针对的是不同层次。
+
+### 3.1 先区分三个问题
+
+| 问题 | 对应操作 |
+| --- | --- |
+| 我修改了文件，但还没有暂存，想丢弃这些修改 | `git restore` |
+| 我已经暂存了修改，但还没有提交，想取消暂存 | `git restore --staged` |
+| 我已经提交了错误修改，想创建一个反向修改 | `git revert` |
+
+对于最后一种情况，最值得向初学者介绍的是：
+
+```bash
+git revert <commit>
+```
+
+它会创建一个新的提交，用于撤销指定提交所引入的修改。
+
+例如：
+
+```text
+A → B → C → D
+              \
+               E
+```
+
+假设 D 是一次错误提交。
+
+使用 `git revert D` 后，历史会继续向前：
+
+```text
+A → B → C → D → E
+```
+
+E 是一个新提交，其作用是反向撤销 D 的修改。
+
+**Git 通常不需要通过删除历史来纠正历史。**
+
+这也解释了为什么历史记录不仅是备份，还可以成为团队理解代码变化的依据。
+
+### 3.2 那 `git reset` 呢？
+
+可以简单提及，但不必展开操作细节。
+
+`git reset` 可以移动当前分支引用，并根据参数改变暂存区或工作区状态。
+
+它与 `git revert` 的核心区别在于：
+
+- `revert` 通过新提交撤销先前的变化。
+- `reset` 可以改变当前分支所指向的提交，并可能影响暂存区和工作区。
+
+对于初学者，建议先记住：
+
+> 如果已经把提交共享给其他人，通常优先考虑 `git revert`，而不是随意重写共享历史。
+
+不需要在这节课中深入 `reset --soft`、`--mixed`、`--hard` 的区别。
+
+---
+
+## Part 4 — What Does “Distributed” Mean?（30–40 min）
+
+这一部分是从本地 Git 过渡到 GitHub 的关键。
+
+先提出一个问题：
+
+> 如果 Git 已经能在本地保存历史，为什么还需要 GitHub？
+
+### 4.1 Git 和 GitHub 不是同一个东西
+
+可以先给出一个简单对比：
+
+| Git | GitHub |
+| --- | --- |
+| 一个版本控制系统 | 一个提供 Git 仓库托管等服务的平台 |
+| 可以在本地运行 | 可以托管远程仓库 |
+| 可以记录提交、管理分支、整合历史 | 可以保存远程仓库，便于跨设备或多人共享 |
+| 不要求必须使用 GitHub | 可以托管 Git 仓库，但不等于 Git 本身 |
+
+例如，你完全可以在没有网络的情况下：
+
+```bash
+git init
+git add .
+git commit -m "Initial commit"
+```
+
+这些操作不需要 GitHub。
+
+因此，GitHub 不是 Git 的必要组成部分。
+
+### 4.2 为什么 Git 是分布式版本控制系统？
+
+一个关键区别是：
+
+在 Git 中，每个正常克隆得到的仓库都可以包含完整的提交历史和相关对象，而不只是本地文件的一份副本。
+
+假设有两名开发者：
+
+```text
+Developer A
+Local Repository
+        │
+        │
+      GitHub
+        │
+        │
+Developer B
+Local Repository
+```
+
+A 和 B 都可以在本地创建提交、查看历史、切换分支。
+
+他们不需要在每一次提交时都连接 GitHub。
+
+这和一些必须依赖中央服务器才能完成关键版本控制操作的工作流有明显区别。
+
+不过需要补充一个边界：浅克隆、部分克隆等特殊方式可能不会在本地取得全部历史或对象，因此“每个仓库都有完整历史”应理解为普通完整克隆的典型情况，而不是所有配置下的绝对规则。
+
+### 4.3 Remote 是什么？
+
+Git 使用 remote 来记录远程仓库的信息。
+
+例如：
+
+```bash
+git remote -v
+```
+
+可以查看已配置的远程仓库及其地址。
+
+克隆 GitHub 仓库时：
+
+```bash
+git clone <repository-url>
+```
+
+Git 会在本地创建一个仓库，并通常将来源仓库配置为名为 `origin` 的 remote。
+
+这里要强调：
+
+**`origin` 只是一个常见的默认名称，不是 GitHub 的特殊关键字。**
+
+你可以把 remote 理解为一个命名的远程仓库连接配置。
+
+它可以关联到 GitHub，也可以关联到公司内部的 Git 服务器，甚至是另一台电脑上的仓库。
+
+---
+
+## Part 5 — Push, Fetch, Pull: What Actually Moves?（40–47 min）
+
+这是远程部分最重要的知识点。
+
+我建议把它讲成三个不同的问题，而不是让学生死记命令。
+
+### 5.1 Push：把本地提交发布到远程仓库
+
+```bash
+git push
+```
+
+概念上，它会将远程仓库尚未拥有的必要 Git 对象传过去，并更新远程引用，但具体更新还会受到目标分支、权限和服务器规则等因素影响。
+
+可以理解为：
+
+> 我在本地完成了一些提交，现在希望把这些提交发布到远程仓库。
+
+### 5.2 Fetch：获取远程的新信息
+
+```bash
+git fetch
+```
+
+它会获取远程的新提交和相关对象，并更新相应的远程跟踪引用。
+
+例如：
+
+```text
+origin/main ──► Commit D
+main        ──► Commit C
+```
+
+执行 `git fetch` 后，Git 可能发现远程 `main` 已经前进到 D。
+
+此时，本地的 `origin/main` 会更新到 D，但本地 `main` 不会因此自动移动。
+
+这说明：
+
+**获取远程更新，不等于把远程更新直接整合进当前工作分支。**
+
+### 5.3 Pull：获取并整合
+
+```bash
+git pull
+```
+
+在常见配置下，它可以理解为：
+
+```text
+git fetch + integrate
+```
+
+后半部分通常是 merge，也可以根据配置使用 rebase。
+
+例如：
+
+```text
+本地 main:       A → B → C
+远程 main:       A → B → D
+```
+
+执行 `git pull` 后，Git 会先获取远程更新，再按照配置尝试整合远程历史。
+
+如果本地没有独立的新提交，可能只是 fast-forward。
+
+如果本地和远程分别产生了提交，则可能需要 merge 或 rebase。
+
+### 5.4 一个适合课堂的记忆方法
+
+| 命令 | 核心含义 |
+| --- | --- |
+| `push` | 把本地提交发布到远程 |
+| `fetch` | 获取远程更新，但不自动整合进当前分支 |
+| `pull` | 获取远程更新，并尝试整合 |
+
+需要提醒学生：不要把 `pull` 理解为简单地“下载文件”。
+
+Git 处理的是仓库对象、引用和提交历史之间的同步与整合。
+
+---
+
+## Part 6 — Putting It Together: A Complete Mental Model（47–50 min）
+
+最后用一张图将整门课的内容串起来。
+
+可以用以下流程总结：
+
+```text
+Edit Files
+    │
+    ▼
+Working Tree
+    │
+    │ git add
+    ▼
+Staging Area
+    │
+    │ git commit
+    ▼
+Local Repository
+    │
+    ├── Branch
+    ├── History
+    ├── Merge
+    └── Restore / Revert
+    │
+    │ git push / fetch / pull
+    ▼
+Remote Repository
+```
+
+最后强调三点：
+
+1. **Git 的核心是管理历史。** 文件是工作对象，提交和提交之间的关系构成了历史。
+2. **Git 的分支是轻量的历史引用。** 它使不同的开发路径可以独立推进，再通过合并整合。
+3. **Git 是分布式的。** GitHub 提供远程仓库托管和共享能力，但 Git 本身就可以在本地独立工作。
+
+---
+
+# 四、如何把“设计初衷”融入课程，而不是单独讲历史？
+
+我建议不要单独拿出十分钟讲 Git 的发展史。
+
+更有效的方式是让每一个重要功能都回答一个设计问题。
+
+| 设计问题 | 引出的概念 | 学生应该理解什么 |
+| --- | --- | --- |
+| 为什么不能只复制文件夹？ | Version Control | 需要系统化地记录变化和历史 |
+| 为什么 `add` 和 `commit` 分开？ | Staging Area | 提交应该是经过选择的、有明确边界的变化集合 |
+| 为什么 Git 使用对象和哈希？ | Content-addressed storage | 对象可以通过内容标识，并支持对象复用和完整性检查 |
+| 为什么提交之间需要父子关系？ | Commit Graph | 历史可以被追踪、分叉和整合 |
+| 为什么分支可以很轻量？ | Branch References | 分支主要是指向提交的引用，不是项目副本 |
+| 为什么会有 Merge Conflict？ | Three-way Merge | Git 可以整合内容变化，但无法保证推断出所有语义意图 |
+| 为什么 Git 不需要中央服务器来创建提交？ | Distributed VCS | 每个本地仓库都可以独立管理自己的历史 |
+| 为什么还需要 GitHub？ | Remote Repository | 远程仓库让不同设备和开发者能够交换、共享历史 |
+
+这种安排会让课程更连贯。
+
+学生不是在记忆一堆功能，而是在逐渐理解：**Git 的各个功能是如何回应真实的软件开发问题的。**
+
+---
+
+# 五、哪些内容应该讲，哪些应该刻意不讲？
+
+如果只有 100 分钟，我建议严格控制范围。
+
+## 建议重点讲解
+
+| 内容 | 深度 |
+| --- | --- |
+| 为什么需要版本控制 | 详细 |
+| Working Tree / Staging Area / Repository | 详细 |
+| `add`、`commit`、`status`、`diff` | 理解并演示 |
+| Commit、snapshot、tree、blob | 概念解释 |
+| Hash 与对象复用 | 概念解释 |
+| Commit DAG | 详细 |
+| Branch 与 HEAD | 详细 |
+| Merge 与 conflict | 详细 |
+| `restore` 与 `revert` | 了解常见使用场景 |
+| Git 与 GitHub 的区别 | 详细 |
+| Remote、`push`、`fetch`、`pull` | 详细 |
+
+## 建议只提及，不深入
+
+| 内容 | 原因 |
+| --- | --- |
+| Rebase 的详细操作 | 容易把课程带入复杂的历史改写场景 |
+| Cherry-pick | 与本课的核心心智模型关系较弱 |
+| `reset --soft`、`--mixed`、`--hard` | 初学者容易混淆工作区、暂存区和历史变化 |
+| Interactive rebase | 需要额外解释提交重写与历史整理 |
+| Submodule、Subtree | 属于更进阶的仓库管理问题 |
+| Git Hooks | 与当前目标关系不大 |
+| GitHub Pull Requests、Issues、Actions | 属于平台工作流，不是理解 Git 基础所必需的内容 |
+| GitHub 的权限、组织与社区功能 | 超出当前课程范围 |
+
+尤其不建议把第二节变成“Git 常用命令大全”。分支、合并、远程同步之间有一条清晰的逻辑链，沿着这条逻辑讲会更有效。
+
+---
+
+# 六、实践如何安排：少操作，多推理
+
+既然你希望减少上手操作，我建议将实践设计成 **Predict Before You Execute**。
+
+每次演示之前，先给出当前状态，让学生预测 Git 会发生什么。
+
+这样既能维持参与度，也不会因为现场配置环境、安装 Git、处理认证等问题浪费时间。
+
+## 互动 1：`git add` 到底添加了什么？
+
+**时间：2 分钟**
+
+初始内容：
+
+```python
+print("Hello")
+```
+
+执行顺序：
+
+```bash
+# 将文件修改为 print("Hello, Git")
+git add main.py
+
+# 再修改为 print("Hello, Git!")
+git commit -m "Update greeting"
+```
+
+提问：
+
+> 提交里保存的是哪一个版本？
+
+考察 staging area 的概念。
+
+## 互动 2：分支到底复制了什么？
+
+**时间：2 分钟**
+
+展示：
+
+```text
+A → B → C
+          main
+```
+
+执行：
+
+```bash
+git branch feature
+```
+
+提问：
+
+- 是否生成了一个新的 commit？
+- 是否复制了整个项目？
+- 新分支指向哪里？
+
+考察 branch reference 的概念。
+
+## 互动 3：为什么 Merge 会产生冲突？
+
+**时间：3 分钟**
+
+展示两个分支分别把：
+
+```python
+timeout = 10
+```
+
+修改为：
+
+```python
+timeout = 20
+```
+
+和：
+
+```python
+timeout = 30
+```
+
+提问：
+
+> Git 应该选择 20 还是 30？
+
+让学生先判断，再解释冲突的本质。
+
+## 互动 4：Fetch 和 Pull 有什么区别？
+
+**时间：3 分钟**
+
+展示：
+
+```text
+Local main:  A → B → C
+Remote main: A → B → D
+```
+
+提问：
+
+> 执行 `git fetch` 后，本地的 `main` 会不会自动指向 D？
+
+接着再解释 remote-tracking branch 和 pull。
+
+**总计约 10 分钟。** 其余演示可以由讲师操作，不要求学生从零配置仓库。
+
+---
+
+# 七、推荐的最终时间表
+
+如果需要直接拿去制作 PPT，可以采用下面这个版本。
+
+## Session 1 — Git's Local Model and Internal Design
+
+| 时间 | 模块 | 核心内容 |
+| --- | --- | --- |
+| 0–8 min | The Problem | 为什么需要版本控制；手动备份的局限 |
+| 8–20 min | The Three Areas | Working Tree、Staging Area、Repository；`add` 与 `commit` |
+| 20–32 min | What Is a Commit? | 快照模型、tree、blob、hash、对象复用 |
+| 32–42 min | History as a Graph | Commit、DAG、Branch Reference、HEAD |
+| 42–48 min | Live Demo | `status`、`diff`、`log`、`log --graph` |
+| 48–50 min | Recap | 三个关键问题 |
+
+## Session 2 — Branching, Merging and Remote Repositories
+
+| 时间 | 模块 | 核心内容 |
+| --- | --- | --- |
+| 0–8 min | Why Branches? | 独立开发、分支的轻量机制 |
+| 8–20 min | Merge and Conflicts | Fast-forward、三方合并、冲突原因 |
+| 20–30 min | Undo | `restore`、`revert`；简要提及 `reset` |
+| 30–40 min | Distributed Git | Git 与 GitHub 的区别；remote 的概念 |
+| 40–47 min | Push, Fetch and Pull | 远程对象、引用更新和历史整合 |
+| 47–50 min | Final Mental Model | 回顾完整工作流 |
+
+---
+
+# 八、PPT 的叙事顺序建议
+
+最后还有一个设计建议：**尽量让每一页 PPT 只回答一个问题。**
+
+你可以把整门课设计成一条连续的故事线：
+
+```text
+我为什么需要 Git？
+        ↓
+Git 如何记录我的修改？
+        ↓
+为什么需要 Staging Area？
+        ↓
+一个 Commit 究竟是什么？
+        ↓
+Git 如何组织提交历史？
+        ↓
+为什么 Branch 可以很轻量？
+        ↓
+不同分支如何合并？
+        ↓
+Git 如何处理无法自动整合的修改？
+        ↓
+为什么本地 Git 还需要 GitHub？
+        ↓
+不同仓库之间如何交换历史？
+```
+
+建议每个模块都采用类似的讲解顺序：
+
+1. **Problem**：先展示一个具体问题。
+2. **Idea**：解释 Git 为什么采用这种设计。
+3. **Mechanism**：用图解释其工作原理。
+4. **Usage**：展示一到三个对应命令。
+5. **Prediction**：让学生预测执行后会发生什么。
+
+这样能够避免课程退化为命令教学，也能让底层原理始终与实际使用场景对应。
+
+**如果只能保留一个核心教学原则，那就是：先解释 Git 需要解决什么问题，再介绍它提供了什么机制，最后才介绍对应的命令。** 对计算机专业学生而言，这种组织方式更容易建立长期有效的理解，而不只是让他们在课后记住几条命令。
