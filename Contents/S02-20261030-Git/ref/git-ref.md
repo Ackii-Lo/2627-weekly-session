@@ -320,16 +320,24 @@ Git 通过内容寻址的对象存储和对象复用来减少不必要的重复�
 
 例如：
 
-```text
-Commit A
-├── main.py ────── Blob X
-├── utils.py ───── Blob Y
-└── README.md ──── Blob Z
-
-Commit B
-├── main.py ────── Blob X'
-├── utils.py ───── Blob Y
-└── README.md ──── Blob Z
+```mermaid
+graph TD
+    subgraph CommitA["Commit A"]
+        MA["main.py"]
+        UA["utils.py"]
+        RA["README.md"]
+    end
+    subgraph CommitB["Commit B"]
+        MB["main.py"]
+        UB["utils.py"]
+        RB["README.md"]
+    end
+    MA --> X["Blob X"]
+    UA --> Y["Blob Y"]
+    RA --> Z["Blob Z"]
+    UB --> Y
+    RB --> Z
+    MB --> XP["Blob X'"]
 ```
 
 其中：
@@ -357,14 +365,9 @@ Commit 3
 
 Git 的做法是：**名字不由任何人分配，而是从内容本身计算出来**——对对象内容做哈希运算，得到对象 ID：
 
-```text
-Object Content
-      │
-      ▼
-   Hash Function
-      │
-      ▼
-Object ID
+```mermaid
+graph LR
+    OC["Object Content"] --> HF["Hash Function"] --> OID["Object ID"]
 ```
 
 在传统 SHA-1 仓库中，对象 ID 通常显示为 40 位十六进制字符串；Git 也支持使用 SHA-256 的仓库格式。
@@ -407,16 +410,18 @@ Object ID
 
 例如：
 
-```text
-A ← B ← C
+```mermaid
+graph LR
+    A <-- B <-- C
 ```
 
 这里的箭头可以理解为：B 的父提交是 A，C 的父提交是 B。
 
 当项目持续开发时，提交一个个连接起来，看起来像一条链：
 
-```text
-A → B → C → D
+```mermaid
+graph LR
+    A --> B --> C --> D
 ```
 
 初学者可能会把 Git 的历史理解成一条不断向前延伸的列表，但实际情况更加灵活。
@@ -433,18 +438,19 @@ A → B → C → D
 
 例如：
 
-```text
-main ──► C
+```mermaid
+graph LR
+    main(["main"]) --> C
 ```
 
 `main` 就是这样一个引用，此刻指向提交 C。
 
 当你在 `main` 上创建新提交 D 时，Git 不需要改动任何历史，只要把这个引用移动到 D：
 
-```text
-main ──► D
-
-A → B → C → D
+```mermaid
+graph LR
+    A --> B --> C --> D
+    main(["main"]) --> D
 ```
 
 这也是 Git 中分支非常轻量的原因之一。
@@ -459,14 +465,10 @@ Git 用一个特殊标记回答：`HEAD` 表示当前检出的版本位置，通
 
 例如：
 
-```text
-HEAD
- │
- ▼
-main
- │
- ▼
-Commit D
+```mermaid
+graph TD
+    HEAD(["HEAD"]) --> main(["main"])
+    main --> D["Commit D"]
 ```
 
 如果你切换到另一个分支，`HEAD` 的位置也会随之改变——VSCode 状态栏左下角显示的分支名，反映的正是 `HEAD` 当前所在的分支。
@@ -542,16 +544,18 @@ Git 的历史不是一个只能向前推进的版本编号列表，而是一个�
 
 假设项目历史如下：
 
-```text
-A → B → C
+```mermaid
+graph LR
+    A --> B --> C
 ```
 
 现在你想增加一个新功能。
 
 一种方法是在当前版本上直接修改：
 
-```text
-A → B → C → D
+```mermaid
+graph LR
+    A --> B --> C --> D
 ```
 
 但如果你不确定这个功能能否成功，就会面临一个问题：
@@ -566,12 +570,12 @@ Git 的分支允许你在现有历史基础上创建另一条开发路径。
 
 满足这个需求的方案，就是在现有历史基础上分出一条可以独立推进的开发路径。例如：
 
-```text
-        D → E  feature
-       /
-A → B → C
-       \
-        main
+```mermaid
+graph LR
+    A --> B --> C
+    C --> D --> E
+    main(["main"]) --> C
+    feature(["feature"]) --> E
 ```
 
 这个图表示：
@@ -609,10 +613,12 @@ A → B → C
 
 假设：
 
-```text
-A → B → C → D
-          \
-           E → F
+```mermaid
+graph LR
+    A --> B --> C --> D
+    C --> E --> F
+    main(["main"]) --> D
+    feature(["feature"]) --> F
 ```
 
 其中：
@@ -631,11 +637,13 @@ Git 会根据提交历史和文件内容来判断如何完成整合。
 
 **情况 A：Fast-forward**
 
-假设 `main` 仍然指向 C，而 `feature` 已经前进到 F：
+假设 `main` 仍然指向 C，而 `feature` 已经前进到 E：
 
-```text
-A → B → C → D → E
-          main   feature
+```mermaid
+graph LR
+    A --> B --> C --> D --> E
+    main(["main"]) --> C
+    feature(["feature"]) --> E
 ```
 
 当切换到 `main` 并合并 `feature` 时，如果 `main` 没有独立的新提交，Git 可以直接把 `main` 引用移动到 E。
@@ -648,12 +656,13 @@ A → B → C → D → E
 
 如果 `main` 和 `feature` 都产生了独立提交：
 
-```text
-        D ───────┐
-       /         │
-A → B → C        M
-       \         │
-        E ───────┘
+```mermaid
+graph LR
+    A --> B --> C
+    C --> D["D（main）"]
+    C --> E["E（feature）"]
+    D --> M["M（merge commit）"]
+    E --> M
 ```
 
 Git 可以使用三个版本进行合并：
@@ -739,18 +748,18 @@ Git 可以处理大量结构清晰、没有歧义的修改；但它无法仅凭�
 
 例如：
 
-```text
-A → B → C → D
-              \
-               E
+```mermaid
+graph LR
+    A --> B --> C --> D["D（错误提交）"]
 ```
 
 假设 D 是一次错误提交。
 
 对 D 执行“还原提交”后，历史会继续向前：
 
-```text
-A → B → C → D → E
+```mermaid
+graph LR
+    A --> B --> C --> D --> E["E（还原提交）"]
 ```
 
 E 是一个新提交，其作用是反向撤销 D 的修改。
@@ -811,16 +820,13 @@ E 是一个新提交，其作用是反向撤销 D 的修改。
 
 看一个具体场景。假设有两名开发者：
 
-```text
-Developer A
-Local Repository
-        │
-        │
-      GitHub
-        │
-        │
-Developer B
-Local Repository
+```mermaid
+graph TD
+    A["Developer A<br>Local Repository"]
+    GH["GitHub"]
+    B["Developer B<br>Local Repository"]
+    A <--> GH
+    GH <--> B
 ```
 
 A 和 B 都可以在本地创建提交、查看历史、切换分支——哪怕此刻完全没有网络。
@@ -881,9 +887,10 @@ Git 会在本地创建一个仓库，并通常将来源仓库配置为名为 `or
 
 例如：
 
-```text
-origin/main ──► Commit D
-main        ──► Commit C
+```mermaid
+graph LR
+    originmain(["origin/main"]) --> D["Commit D"]
+    main(["main"]) --> C["Commit C"]
 ```
 
 执行抓取后，Git 可能发现远程 `main` 已经前进到 D。
@@ -910,9 +917,10 @@ main        ──► Commit C
 
 例如：
 
-```text
-本地 main:       A → B → C
-远程 main:       A → B → D
+```mermaid
+graph LR
+    A --> B --> C["C（本地 main）"]
+    B --> D["D（远程 main）"]
 ```
 
 执行拉取后，Git 会先获取远程更新，再按照配置尝试整合远程历史。
@@ -941,28 +949,16 @@ Git 处理的是仓库对象、引用和提交历史之间的同步与整合。
 
 可以用以下流程总结：
 
-```text
-Edit Files
-    │
-    ▼
-Working Tree
-    │
-    │ Stage（源代码管理视图 +）
-    ▼
-Staging Area
-    │
-    │ Commit（消息框 + ✓）
-    ▼
-Local Repository
-    │
-    ├── Branch
-    ├── History
-    ├── Merge
-    └── Restore / Revert
-    │
-    │ Push / Fetch / Pull（··· → 拉取、推送）
-    ▼
-Remote Repository
+```mermaid
+flowchart TD
+    EF["Edit Files"] --> WT["Working Tree"]
+    WT -->|"Stage（源代码管理视图 +）"| SA["Staging Area"]
+    SA -->|"Commit（消息框 + ✓）"| LR["Local Repository"]
+    LR --> BR["Branch"]
+    LR --> HIS["History"]
+    LR --> MG["Merge"]
+    LR --> RV["Restore / Revert"]
+    LR -->|"Push / Fetch / Pull（··· → 拉取、推送）"| RR["Remote Repository"]
 ```
 
 最后强调三点：
@@ -1070,9 +1066,10 @@ print("Hello")
 
 展示：
 
-```text
-A → B → C
-          main
+```mermaid
+graph LR
+    A --> B --> C
+    main(["main"]) --> C
 ```
 
 操作：点击状态栏左下角的分支名 → “创建新分支...” → 输入 `feature`（VSCode 创建后会自动切换到新分支）。
@@ -1119,9 +1116,10 @@ timeout = 30
 
 展示：
 
-```text
-Local main:  A → B → C
-Remote main: A → B → D
+```mermaid
+graph LR
+    A --> B --> C["C（Local main）"]
+    B --> D["D（Remote main）"]
 ```
 
 提问：
@@ -1168,26 +1166,17 @@ Remote main: A → B → D
 
 你可以把整门课设计成一条连续的故事线：
 
-```text
-我为什么需要 Git？
-        ↓
-Git 如何记录我的修改？
-        ↓
-为什么需要 Staging Area？
-        ↓
-一个 Commit 究竟是什么？
-        ↓
-Git 如何组织提交历史？
-        ↓
-为什么 Branch 可以很轻量？
-        ↓
-不同分支如何合并？
-        ↓
-Git 如何处理无法自动整合的修改？
-        ↓
-为什么本地 Git 还需要 GitHub？
-        ↓
-不同仓库之间如何交换历史？
+```mermaid
+flowchart TD
+    Q1["我为什么需要 Git？"] --> Q2["Git 如何记录我的修改？"]
+    Q2 --> Q3["为什么需要 Staging Area？"]
+    Q3 --> Q4["一个 Commit 究竟是什么？"]
+    Q4 --> Q5["Git 如何组织提交历史？"]
+    Q5 --> Q6["为什么 Branch 可以很轻量？"]
+    Q6 --> Q7["不同分支如何合并？"]
+    Q7 --> Q8["Git 如何处理无法自动整合的修改？"]
+    Q8 --> Q9["为什么本地 Git 还需要 GitHub？"]
+    Q9 --> Q10["不同仓库之间如何交换历史？"]
 ```
 
 建议每个模块都采用类似的讲解顺序：
