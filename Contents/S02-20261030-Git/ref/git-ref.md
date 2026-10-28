@@ -52,6 +52,7 @@
 5. 解释 branch、merge 和冲突的基本含义。
 6. 理解 Git 与 GitHub 的关系，以及推送（push）、抓取（fetch）和拉取（pull）的基本作用。
 7. 对常见问题建立初步的诊断思路，而不只是记住命令。
+8. 使用 `.gitignore` 排除不该进入历史的文件，并知道仓库历史存放在 `.git` 目录中。
 
 ---
 
@@ -269,6 +270,28 @@ print("Hello, Git")
 这非常适合做一次简短的互动提问。
 
 它能直接帮助学生理解为什么“暂存”和“提交”是两个独立步骤。
+
+### 2.4 需求出现：有些文件不该进入历史
+
+完成几次提交后，很快会发现两类“不该被记录”的东西：
+
+- **环境杂物**——`.DS_Store`、`__pycache__/`、`node_modules/`、编译产物：每次都变，却没有记录价值，只会把历史撑得又大又乱。
+- **不想公开的内容**——带密码的配置文件、API key：一旦提交，就进了历史，删掉当前版本也删不掉过去的记录。
+
+这正是 `.gitignore` 存在的原因：在仓库根目录放一个名为 `.gitignore` 的文本文件，写上“不进历史”的名单，Git 就会假装看不见它们：
+
+```text
+.DS_Store
+__pycache__/
+*.pyc
+.env
+```
+
+在 VSCode 中：资源管理器中新建文件 `.gitignore`（快捷键新建），写好保存——之后“更改”列表里就不会再出现这些文件。GitHub 创建仓库时也提供现成的忽略模板（Python、Node 等），可以直接选用。
+
+顺带回答一个此阶段必然出现的问题：**历史到底存在哪里？** 就在项目根目录那个隐藏的 `.git` 文件夹里——提交、分支、暂存区全部住在里面。日常不需要打开它，更不要手动修改或把它提交进仓库；把它删掉，历史就消失了（只剩工作区里的文件）。
+
+一句话：**`.gitignore` 决定什么不进历史，`.git` 装着全部历史。**
 
 ### 本部分的核心结论
 
@@ -953,6 +976,7 @@ flowchart TD
 | 为什么需要版本控制 | 详细 |
 | Working Tree / Staging Area / Repository | 详细 |
 | 暂存、提交、查看状态与差异（源代码管理视图） | 理解并演示 |
+| `.gitignore` 与 `.git` 目录 | 知道用途即可 |
 | 一次提交 = 快照 + 说明 | 一句话概括 |
 | 提交 ID 像指纹 | 点到为止 |
 | 提交图（Graph）：历史的分叉与汇合 | 第二节作为分支前奏讲清 |
@@ -1095,7 +1119,7 @@ graph LR
 | 时间 | 模块 | 核心内容 |
 | --- | --- | --- |
 | 0–10 min | The Problem | 飞书/Word 的历史版本；代码为什么需要专门工具；SVN 一句带过 |
-| 10–25 min | The Three Areas | Working Tree、Staging Area、Repository；暂存与提交 |
+| 10–25 min | The Three Areas | Working Tree、Staging Area、Repository；暂存与提交；`.gitignore` 与 `.git` |
 | 25–33 min | What Is a Commit? | 快照 + 说明；提交 ID 像指纹 |
 | 33–41 min | History and References | 提交链、分支书签、HEAD |
 | 41–50 min | Hands-on | GitHub 登录、初始化仓库、第一次提交；三个收尾问题 |

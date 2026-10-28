@@ -148,8 +148,19 @@ Stage (+) picks what the next commit contains. Your one-click commit was staging
 ---
 
 <!-- Regular content page -->
+<!-- .gitignore and .git — replaces the former TODO marker -->
 
-## 08 · What a commit really is
+## 08 · Keep some files out of history
+
+- **`.gitignore`** — the list of files Git should pretend not to see *caches · builds · secrets*
+- **`.git`** — the hidden folder where the whole history lives *never edit it, never commit it*
+- *In VS Code: create `.gitignore` in the repo root — those files vanish from Changes*
+
+---
+
+<!-- Regular content page -->
+
+## 09 · What a commit really is
 
 - **Not** a log of every keystroke
 - **A snapshot** — the whole project at that moment
@@ -161,7 +172,7 @@ Stage (+) picks what the next commit contains. Your one-click commit was staging
 
 <!-- Regular content page -->
 
-## 09 · The commit ID is a fingerprint
+## 10 · The commit ID is a fingerprint
 
 - **Same content, same ID** — identical in every clone
 - **One character changed, whole ID changes** — tamper-evident
@@ -173,7 +184,7 @@ Stage (+) picks what the next commit contains. Your one-click commit was staging
 
 <!-- Regular content page -->
 
-## 10 · History, bookmarks, you
+## 11 · History, bookmarks, you
 
 - **History** — every commit remembers its previous one `A → B → C → D`
 - **Branch** — a movable bookmark stuck on a commit *creating one copies nothing*
@@ -199,7 +210,7 @@ Everyone leaves this room with one commit on their machine
 <!-- _class: activities -->
 <!-- Hands-on steps: four groups -->
 
-## 11 · Fifteen minutes, four steps
+## 12 · Fifteen minutes, four steps
 
 ### 1 · SIGN IN
 
@@ -221,7 +232,7 @@ Two files, two commits — you choose what each one contains.
 
 <!-- Regular content page -->
 
-## 12 · Before the break
+## 13 · Before the break
 
 - Why are **stage** and **commit** two separate steps?
 - What does a commit store — keystrokes, or a snapshot?
@@ -261,7 +272,7 @@ Branches · merging · conflicts · GitHub
 
 ![height:685px](assets/ph-commit-graph.png)
 
-## 13 · When history forks
+## 14 · When history forks
 
 ### SEVERAL LINES AT ONCE
 
@@ -277,7 +288,7 @@ History stops being a line and becomes a graph — a family tree, a river delta.
 
 <!-- Regular content page -->
 
-## 14 · A branch is just a bookmark
+## 15 · A branch is just a bookmark
 
 - **Try safely** — new algorithm on the side, the stable line untouched
 - **Nothing is copied** — a branch is a movable bookmark, near zero cost
@@ -287,7 +298,7 @@ History stops being a line and becomes a graph — a family tree, a river delta.
 
 <!-- Regular content page -->
 
-## 15 · Merge: bring lines together
+## 16 · Merge: bring lines together
 
 - **Fast-forward** — your line never moved: the bookmark simply slides forward
 - **Three-way merge** — both lines moved: base, yours, theirs → one merge commit
@@ -299,7 +310,7 @@ History stops being a line and becomes a graph — a family tree, a river delta.
 
 ![height:720px](assets/ph-conflict.svg)
 
-## 16 · Conflicts are not errors
+## 17 · Conflicts are not errors
 
 ### SAME LINES, DIFFERENT WISHES
 
@@ -315,7 +326,7 @@ Resolve, stage, commit — history moves on.
 
 <!-- Regular content page -->
 
-## 17 · Three ways back
+## 18 · Three ways back
 
 - **Discard (undo arrow)** — drop uncommitted changes
 - **Unstage (minus)** — take things out of the next commit
@@ -327,7 +338,7 @@ Resolve, stage, commit — history moves on.
 
 <!-- Regular content page with table -->
 
-## 18 · Git is not GitHub
+## 19 · Git is not GitHub
 
 | Git | GitHub |
 | --- | --- |
@@ -341,7 +352,7 @@ Resolve, stage, commit — history moves on.
 
 <!-- Regular content page with table -->
 
-## 19 · Distributed: Git vs SVN
+## 20 · Distributed: Git vs SVN
 
 | | SVN | Git |
 | --- | --- | --- |
@@ -355,7 +366,7 @@ Resolve, stage, commit — history moves on.
 
 <!-- Regular content page -->
 
-## 20 · Remote: who do I sync with?
+## 21 · Remote: who do I sync with?
 
 - A **remote** is a named link to another repository
 - `origin` is just the default name — nothing magical
@@ -368,7 +379,7 @@ Resolve, stage, commit — history moves on.
 
 ![height:720px](assets/ph-pushpull.svg)
 
-## 21 · Push, fetch, pull
+## 22 · Push, fetch, pull
 
 ### PUSH
 
@@ -388,7 +399,7 @@ Fetch and integrate — the lines meet again.
 
 <!-- Regular content page -->
 
-## 22 · The whole picture
+## 23 · The whole picture
 
 ```text
 edit files → working tree → (+ stage) → commit → local repository
