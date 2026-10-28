@@ -12,6 +12,8 @@
         "doraise",
         "eamodio",
         "errorlens",
+        "Feishu",
+        "feishu",
         "formulahendry",
         "fread",
         "getchar",
@@ -40,6 +42,7 @@
         "pyinstaller",
         "Pylance",
         "pytest",
+        "pushpull",
         "PYTHONPATH",
         "PYTHONUNBUFFERED",
         "Siyuan",
@@ -60,6 +63,7 @@
     "markdown.marp.pptx.editable": "smart",
     "markdown.marp.mathTypesetting": "katex",
     "markdown.marp.themes": [
-        "./Contents/S01-20261023-Markdown/themes/cpu.css"
+        "./Contents/S01-20261023-Markdown/themes/cpu.css",
+        "./Contents/S02-20261030-Git/themes/cpu.css"
     ]
 }
