@@ -309,22 +309,9 @@ Edit → Stage → Commit
 
 建议让学生把这个模型记住，而不是先记住十几个操作。
 
-### 2.5 上机练习：clone 本仓库，fork 后推送（约 7 分钟）
-
-刚学会暂存与提交，马上来一次真实操作：把**本课程的内容仓库**变成你 GitHub 主页上的一个仓库。
-
-1. **Clone**——打开 Command Palette（Windows：`Ctrl+Shift+P`，macOS：`Cmd+Shift+P`），输入 “Git: Clone”，粘贴仓库地址 `https://github.com/CompPsyUnion/2627-weekly-session.git`，选择本地存放位置，VS Code 会完成克隆并提示打开。
-2. **改动并提交**——在仓库里做一个小改动（例如在任意 Markdown 文件里加一行自己的名字），在 Source Control view 中暂存并提交。
-3. **Push**——点击 “Sync Changes”（或 **···** → “Push”）。你并没有原仓库的写权限，VS Code 会提示没有推送权限、询问是否创建 fork——点击 **Create Fork**。
-4. **验收**——VS Code 会在你的 GitHub 账号下自动创建 fork 并完成推送。打开浏览器访问 `github.com/<你的用户名>`，在仓库列表里找到 `2627-weekly-session`，确认刚才的提交已经出现在你自己的仓库里。
-
-如果还没登录 GitHub，推送时 VS Code 会先弹出浏览器要求授权登录，照做即可（正式的登录演示见 5.1）。
-
-这条链路——clone → 改动 → commit → fork → push——正是日后向开源项目提交贡献的标准入口，仓库的 CONTRIBUTING.md 描述的就是这套流程。
-
 ---
 
-## Part 3 — What Is a Commit, Really?（32–38 min）
+## Part 3 — What Is a Commit, Really?（25–33 min）
 
 这一部分只回答一个问题，点到为止，不展开内部实现。
 
@@ -372,7 +359,7 @@ README.md
 
 ---
 
-## Part 4 — History, References, and "Where Am I"?（38–44 min）
+## Part 4 — History, References, and "Where Am I"?（33–41 min）
 
 这一部分为第二节做铺垫，只保留三个最实用的结论：历史是一条链、分支是一张书签、HEAD 标记你现在的位置。
 
@@ -445,7 +432,7 @@ graph TD
 
 ---
 
-## Part 5 — 动手环节：登录 GitHub，完成第一次提交（44–50 min）
+## Part 5 — 动手环节：登录 GitHub，完成第一次提交（41–50 min）
 
 这一部分留出真正的上机时间，目标只有一个：**每个人现场完成自己的第一次提交。**（原来的“查看历史”演示融合在动手步骤里。）
 
@@ -828,7 +815,7 @@ A 和 B 都可以在本地创建提交、查看历史、切换分支——哪怕
 
 这就是 remote：一条命名的远程仓库连接配置。
 
-其实 Session 1 的上机练习（2.5）里，remote 已经悄悄工作过两次：clone 时 Git 自动把来源仓库配置为名为 `origin` 的 remote；选择 fork 推送时，VS Code 又自动把你自己 GitHub 账号下的仓库关联了进来——全程没有一步手动的“配置远程”操作。
+这些都会在结课练习（Part 7）里亲眼看到：clone 时 Git 自动把来源仓库配置为名为 `origin` 的 remote；选择 fork 推送时，VS Code 又自动把你自己 GitHub 账号下的仓库关联了进来——全程没有一步手动的“配置远程”操作。
 
 这里要强调：
 
@@ -838,7 +825,7 @@ A 和 B 都可以在本地创建提交、查看历史、切换分支——哪怕
 
 ---
 
-## Part 5 — Push, Fetch, Pull: What Actually Moves?（40–47 min）
+## Part 5 — Push, Fetch, Pull: What Actually Moves?（40–44 min）
 
 这是远程部分最重要的知识点。
 
@@ -924,7 +911,7 @@ Git 处理的是仓库对象、引用和提交历史之间的同步与整合。
 
 ---
 
-## Part 6 — Putting It Together: A Complete Mental Model（47–50 min）
+## Part 6 — Putting It Together: A Complete Mental Model（44–46 min）
 
 最后用一张图将整门课的内容串起来。
 
@@ -947,6 +934,21 @@ flowchart TD
 1. **Git 的核心是管理历史。** 文件是工作对象，提交和提交之间的关系构成了历史。
 2. **Git 的分支是轻量的历史引用。** 它使不同的开发路径可以独立推进，再通过合并整合。
 3. **Git 是分布式的。** GitHub 提供远程仓库托管和共享能力，但 Git 本身就可以在本地独立工作。
+
+---
+
+## Part 7 — 结课练习：clone 本仓库，fork 后推送（46–50 min）
+
+课程的最后一件事：把今天学到的整条链路亲手走一遍——把**本课程的内容仓库**变成你 GitHub 主页上的一个仓库。
+
+1. **Clone**——打开 Command Palette（Windows：`Ctrl+Shift+P`，macOS：`Cmd+Shift+P`），输入 “Git: Clone”，粘贴仓库地址 `https://github.com/CompPsyUnion/2627-weekly-session.git`，选择本地存放位置，VS Code 会完成克隆并提示打开。此时 Git 已自动把来源仓库配置为名为 `origin` 的 remote。
+2. **改动并提交**——在仓库里做一个小改动（例如在任意 Markdown 文件里加一行自己的名字），在 Source Control view 中暂存并提交。
+3. **Push**——点击 “Sync Changes”（或 **···** → “Push”）。你并没有原仓库的写权限，VS Code 会提示没有推送权限、询问是否创建 fork——点击 **Create Fork**。VS Code 会在你的 GitHub 账号下自动创建 fork 并完成推送。
+4. **验收**——打开浏览器访问 `github.com/<你的用户名>`，在仓库列表里找到 `2627-weekly-session`，确认刚才的提交已经出现在你自己的仓库里。
+
+如果还没登录 GitHub（Session 1 动手环节没完成的同学），推送时 VS Code 会先弹出浏览器要求授权，照做即可。
+
+这条链路——clone → 改动 → commit → fork → push——正是向开源项目提交贡献的标准入口，仓库的 CONTRIBUTING.md 描述的就是这套流程。课程到这里正好闭环：Session 1 的第一次提交留在你自己的电脑上，最后这次提交去了你自己的 GitHub。
 
 ---
 
@@ -990,6 +992,7 @@ flowchart TD
 | 提交 ID 像指纹 | 点到为止 |
 | 提交图（Graph）：历史的分叉与汇合 | 第二节作为分支前奏讲清 |
 | 动手：GitHub 登录 + 第一次提交 | 现场完成 |
+| 结课练习：clone → fork → push | 现场完成 |
 | Branch 与 HEAD | 详细 |
 | Merge 与 conflict | 详细 |
 | 放弃更改与还原提交（restore / revert） | 了解常见使用场景 |
@@ -1129,10 +1132,9 @@ graph LR
 | --- | --- | --- |
 | 0–10 min | The Problem | 飞书/Word 的历史版本；代码为什么需要专门工具；SVN 一句带过 |
 | 10–25 min | The Three Areas | Working Tree、Staging Area、Repository；暂存与提交；`.gitignore` 与 `.git` |
-| 25–32 min | Clone & Push Exercise | Command Palette（Win/Mac 快捷键）克隆本仓库；fork 并推送到自己的 GitHub |
-| 32–38 min | What Is a Commit? | 快照 + 说明；提交 ID 像指纹 |
-| 38–44 min | History and References | 提交链、分支书签、HEAD |
-| 44–50 min | Hands-on | GitHub 登录、初始化仓库、第一次提交；三个收尾问题 |
+| 25–33 min | What Is a Commit? | 快照 + 说明；提交 ID 像指纹 |
+| 33–41 min | History and References | 提交链、分支书签、HEAD |
+| 41–50 min | Hands-on | GitHub 登录、初始化仓库、第一次提交；三个收尾问题 |
 
 ## Session 2 — Branching, Merging and Remote Repositories
 
@@ -1142,8 +1144,9 @@ graph LR
 | 8–20 min | Merge and Conflicts | Fast-forward、三方合并、冲突原因 |
 | 20–30 min | Undo | 放弃更改、还原提交；简要提及 reset |
 | 30–40 min | Distributed Git | Git 与 GitHub 的区别；SVN 对比；remote 的概念 |
-| 40–47 min | Push, Fetch and Pull | 远程对象、引用更新和历史整合 |
-| 47–50 min | Final Mental Model | 回顾完整工作流 |
+| 40–44 min | Push, Fetch and Pull | 发布、抓取、拉取三个问题 |
+| 44–46 min | Final Mental Model | 回顾完整工作流 |
+| 46–50 min | Final Exercise | Command Palette 克隆本仓库；fork 并推送到自己的 GitHub |
 
 ---
 
@@ -1164,6 +1167,7 @@ flowchart TD
     Q7 --> Q8["Git 如何处理无法自动整合的修改？"]
     Q8 --> Q9["为什么本地 Git 还需要 GitHub？"]
     Q9 --> Q10["不同仓库之间如何交换历史？"]
+    Q10 --> Q11["亲手走一遍完整链路？（结课练习）"]
 ```
 
 建议每个模块都采用类似的讲解顺序：

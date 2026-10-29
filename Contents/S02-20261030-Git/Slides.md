@@ -58,6 +58,8 @@ Why Git exists · how a commit is born · your first commit
 
 Feishu / WPS: open history, restore any autosave, see who changed what.
 
+<br/>
+
 ### WORD & POWERPOINT
 
 Autosave plus version history — mistakes become reversible.
@@ -410,6 +412,38 @@ edit files → working tree → (+ stage) → commit → local repository
 ```
 
 - *Everything from today lives somewhere on this line.*
+
+---
+
+<!-- _class: activities -->
+<!-- Final exercise: clone / fork / push — mirrors ref Part 7 -->
+
+## 24 · Clone this repo, push to yours
+
+### 1 · CLONE
+
+Command Palette — `Ctrl+Shift+P` (Win) / `Cmd+Shift+P` (Mac) →
+
+"Git: Clone" → paste the repo URL.
+
+### 2 · COMMIT
+
+Make a small change → stage → commit.
+
+---
+
+<!-- _class: activities -->
+<!-- Final exercise: clone / fork / push — mirrors ref Part 7 -->
+
+### 3 · PUSH
+
+Click "Sync Changes" → no write permission? → **Create Fork**.
+
+### 4 · CHECK
+
+Visit `github.com/<your-username>` — your commit is there.
+
+*The whole course, one loop: clone → commit → fork → push.*
 
 ---
 
