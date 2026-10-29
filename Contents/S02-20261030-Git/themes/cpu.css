@@ -33,7 +33,7 @@ section {
   background: #ffffff;
   color: var(--ink);
   font-family: var(--sans);
-  font-size: 22px;
+  font-size: 27px;
   font-weight: 500;
   line-height: 1.6;
 }
@@ -121,7 +121,7 @@ h2 {
   border-bottom: 2px dashed var(--grid);
   color: var(--yellow);
   font-weight: 900;
-  font-size: 40px;
+  font-size: 44px;
   line-height: 1.25;
 }
 
@@ -145,7 +145,7 @@ h3 {
   background: var(--yellow);
   color: var(--ink);
   font-weight: 900;
-  font-size: 22px;
+  font-size: 24px;
   letter-spacing: 0.05em;
   line-height: 1.4;
 }
@@ -199,7 +199,7 @@ table {
   border-collapse: collapse;
   width: 100%;
   margin: 16px 0 8px;
-  font-size: 21px;
+  font-size: 26px;
 }
 
 th {
@@ -263,7 +263,7 @@ div.columns > div.column > :first-child {
 /* ---------- roster table (name | role | duties) ---------- */
 
 section.roster table {
-  font-size: 18px;
+  font-size: 22px;
   table-layout: fixed;
 }
 
@@ -326,16 +326,16 @@ section.side p > img:only-child {
 }
 
 section.side h2 {
-  font-size: 34px;
+  font-size: 36px;
 }
 
 section.side h3 {
-  font-size: 30px;
+  font-size: 33px;
   margin-top: auto;
 }
 
 section.side h3 + p {
-  font-size: 24px;
+  font-size: 29px;
   margin: 10px 0 0;
 }
 
@@ -394,7 +394,7 @@ section.lead h2 {
   border: none;
   color: var(--ink);
   font-weight: 700;
-  font-size: 21px;
+  font-size: 23px;
 }
 
 section.lead h2::after {
@@ -406,7 +406,7 @@ section.lead h2::after {
   text-align: right;
   color: var(--ink);
   font-weight: 900;
-  font-size: 18px;
+  font-size: 19px;
   line-height: 1.5;
 }
 
@@ -418,20 +418,20 @@ section.lead h1 {
   margin: 0;
   color: var(--ink);
   font-weight: 900;
-  font-size: 44px;
+  font-size: 48px;
   line-height: 1.22;
 }
 
 section.lead p {
   margin: 0 0 12px;
   font-weight: 700;
-  font-size: 23px;
+  font-size: 27px;
 }
 
 section.lead p + p {
   margin-top: 2px;
   font-weight: 500;
-  font-size: 17px;
+  font-size: 20px;
   color: var(--gray);
 }
 
@@ -476,11 +476,11 @@ section.agenda ol li {
   counter-increment: item;
   position: relative;
   display: block;
-  padding: 24px 16px 24px 128px;
+  padding: 20px 16px 20px 138px;
   margin: 0;
   border-bottom: 2px dashed var(--grid);
   font-weight: 900;
-  font-size: 30px;
+  font-size: 35px;
   line-height: 1.35;
 }
 
@@ -492,7 +492,7 @@ section.agenda ol li::before {
   transform: translateY(-50%);
   font-family: var(--display);
   font-weight: 400;
-  font-size: 54px;
+  font-size: 58px;
   line-height: 1;
   color: var(--yellow-soft);
 }
@@ -512,11 +512,12 @@ section.agenda ol li:first-child em {
 /* ---------- grouped timeline slide ---------- */
 
 section.activities {
-  font-size: 20px;
+  font-size: 28px;
 }
 
 section.activities h3 {
-  margin: 14px 0 6px;
+  margin: 16px 0 6px;
+  font-size: 28px;
 }
 
 section.activities ul {
@@ -607,7 +608,7 @@ section.yellow p {
   margin: 0;
   color: var(--ink);
   font-weight: 700;
-  font-size: 20px;
+  font-size: 24px;
 }
 
 /* ---------- code blocks (macOS window style) ---------- */
@@ -620,7 +621,7 @@ pre {
   border-radius: 12px;
   background: #fdfaf0;
   box-shadow: 7px 7px 0 var(--yellow);
-  font-size: 20px;
+  font-size: 24px;
   line-height: 1.55;
   overflow: hidden;
 }

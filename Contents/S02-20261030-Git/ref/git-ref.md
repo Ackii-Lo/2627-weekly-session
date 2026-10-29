@@ -47,7 +47,7 @@
 
 1. 解释为什么手动备份和复制项目文件夹不是理想的版本管理方案。
 2. 理解 working tree、staging area 和 repository 之间的区别。
-3. 在 VSCode 源代码管理视图中完成暂存、提交、查看差异与提交历史，并在课堂上独立完成第一次提交（含 GitHub 登录）。
+3. 在 VSCode 的 Source Control view 中完成暂存、提交、查看差异与提交历史，并在课堂上独立完成第一次提交（含 GitHub 登录）。
 4. 理解提交、快照、提交 ID 和提交历史等基本概念，能用一句话说出“一次提交记录了什么”。
 5. 解释 branch、merge 和冲突的基本含义。
 6. 理解 Git 与 GitHub 的关系，以及推送（push）、抓取（fetch）和拉取（pull）的基本作用。
@@ -187,9 +187,9 @@ Git 由 Linus Torvalds 在 2005 年为开发 Linux 内核而创建，如今几�
 
 在 VSCode 中演示“从工作台写入档案柜”，看起来只要一步：
 
-1. 修改 `main.py` 并保存，打开源代码管理视图（活动栏中的源代码管理图标，快捷键 Ctrl+Shift+G）。`main.py` 出现在“更改”列表中——这就是工作区的当前状态（`git status` 回答的问题）。
+1. 修改 `main.py` 并保存，打开 Source Control view（Activity Bar 中的 Source Control 图标，快捷键 Ctrl+Shift+G）。`main.py` 出现在“Changes”列表中——这就是工作区的当前状态（`git status` 回答的问题）。
 2. 在视图顶部的消息框输入提交信息（例如 `Add input validation`）。
-3. 直接点击 **✓**（提交）。“更改”列表清空；打开提交图，可以看到新出现的提交——工作区的状态被写入了本地仓库。
+3. 直接点击 **✓**（提交）。“Changes”列表清空；打开提交图，可以看到新出现的提交——工作区的状态被写入了本地仓库。
 
 关键在于：**这两个区域不是同一个东西。**
 
@@ -221,13 +221,13 @@ README.md
 
 这正是第三个区域存在的原因——**Staging Area（暂存区，也叫 Index）**：准备纳入下一次提交的内容，可以理解为**下一份提交的草稿**。它位于工作台和档案柜之间：先挑选要归档的内容放进草稿，再统一写入历史。
 
-回头再看上一节的演示：点击 **✓** 时，“更改”列表里还有未暂存的内容，VSCode 其实替你多做了一步——先把它们放进暂存区（对应 `git add`），再创建提交（对应 `git commit`）。暂存区一直都在，只是被“直接提交”的便利藏在了幕后；当你需要只提交一部分修改时，它才走到台前。
+回头再看上一节的演示：点击 **✓** 时，“Changes”列表里还有未暂存的内容，VSCode 其实替你多做了一步——先把它们放进暂存区（对应 `git add`），再创建提交（对应 `git commit`）。暂存区一直都在，只是被“直接提交”的便利藏在了幕后；当你需要只提交一部分修改时，它才走到台前。
 
 在 VSCode 中，这只意味着：只点击 `main.py` 旁边的 **+**（只暂存这一个文件），然后输入 `Fix input validation`，点击 **✓** 提交。
 
 注意，这并不是说其他文件的修改已经消失了。它们仍然可以留在工作区，等待后续处理。
 
-如果需要更细粒度的控制，VSCode 也支持部分暂存：点击“更改”列表中的文件打开差异视图，把鼠标悬停在某个变更块（hunk）上点击 **+**，只暂存这一块；或者先在差异视图中选中部分行，再点击差异编辑器右上角的 **···** → “暂存选定范围（Stage Selected Ranges）”。
+如果需要更细粒度的控制，VSCode 也支持部分暂存：点击“Changes”列表中的文件打开 diff view，把鼠标悬停在某个变更块（hunk）上点击 **+**，只暂存这一块；或者先在 diff view 中选中部分行，再点击 diff editor 右上角的 **···** → “Stage Selected Ranges”。
 
 这相当于按块、按范围挑选要进入下一次提交的内容。
 
@@ -247,7 +247,7 @@ print("Hello")
 print("Hello, Git")
 ```
 
-然后在源代码管理视图中点击 `main.py` 旁边的 **+**，完成暂存。
+然后在 Source Control view 中点击 `main.py` 旁边的 **+**，完成暂存。
 
 之后，你又把文件改成：
 
@@ -287,7 +287,7 @@ __pycache__/
 .env
 ```
 
-在 VSCode 中：资源管理器中新建文件 `.gitignore`（快捷键新建），写好保存——之后“更改”列表里就不会再出现这些文件。GitHub 创建仓库时也提供现成的忽略模板（Python、Node 等），可以直接选用。
+在 VSCode 中：资源管理器中新建文件 `.gitignore`（快捷键新建），写好保存——之后“Changes”列表里就不会再出现这些文件。GitHub 创建仓库时也提供现成的忽略模板（Python、Node 等），可以直接选用。
 
 顺带回答一个此阶段必然出现的问题：**历史到底存在哪里？** 就在项目根目录那个隐藏的 `.git` 文件夹里——提交、分支、暂存区全部住在里面。日常不需要打开它，更不要手动修改或把它提交进仓库；把它删掉，历史就消失了（只剩工作区里的文件）。
 
@@ -305,13 +305,26 @@ Edit → Stage → Commit
 修改文件 → 选择提交内容 → 创建历史记录
 ```
 
-在 VSCode 中，这三步分别对应：在编辑器中修改文件 → 源代码管理视图中点击 **+** → 输入提交信息后点击 **✓**。
+在 VSCode 中，这三步分别对应：在编辑器中修改文件 → Source Control view 中点击 **+** → 输入提交信息后点击 **✓**。
 
 建议让学生把这个模型记住，而不是先记住十几个操作。
 
+### 2.5 上机练习：clone 本仓库，fork 后推送（约 7 分钟）
+
+刚学会暂存与提交，马上来一次真实操作：把**本课程的内容仓库**变成你 GitHub 主页上的一个仓库。
+
+1. **Clone**——打开 Command Palette（Windows：`Ctrl+Shift+P`，macOS：`Cmd+Shift+P`），输入 “Git: Clone”，粘贴仓库地址 `https://github.com/CompPsyUnion/2627-weekly-session.git`，选择本地存放位置，VS Code 会完成克隆并提示打开。
+2. **改动并提交**——在仓库里做一个小改动（例如在任意 Markdown 文件里加一行自己的名字），在 Source Control view 中暂存并提交。
+3. **Push**——点击 “Sync Changes”（或 **···** → “Push”）。你并没有原仓库的写权限，VS Code 会提示没有推送权限、询问是否创建 fork——点击 **Create Fork**。
+4. **验收**——VS Code 会在你的 GitHub 账号下自动创建 fork 并完成推送。打开浏览器访问 `github.com/<你的用户名>`，在仓库列表里找到 `2627-weekly-session`，确认刚才的提交已经出现在你自己的仓库里。
+
+如果还没登录 GitHub，推送时 VS Code 会先弹出浏览器要求授权登录，照做即可（正式的登录演示见 5.1）。
+
+这条链路——clone → 改动 → commit → fork → push——正是日后向开源项目提交贡献的标准入口，仓库的 CONTRIBUTING.md 描述的就是这套流程。
+
 ---
 
-## Part 3 — What Is a Commit, Really?（25–33 min）
+## Part 3 — What Is a Commit, Really?（32–38 min）
 
 这一部分只回答一个问题，点到为止，不展开内部实现。
 
@@ -359,7 +372,7 @@ README.md
 
 ---
 
-## Part 4 — History, References, and "Where Am I"?（33–41 min）
+## Part 4 — History, References, and "Where Am I"?（38–44 min）
 
 这一部分为第二节做铺垫，只保留三个最实用的结论：历史是一条链、分支是一张书签、HEAD 标记你现在的位置。
 
@@ -417,7 +430,7 @@ graph TD
     main --> D["Commit D"]
 ```
 
-如果你切换到另一个分支，`HEAD` 的位置也会随之改变——VSCode 状态栏左下角显示的分支名，反映的正是 `HEAD` 当前所在的分支。
+如果你切换到另一个分支，`HEAD` 的位置也会随之改变——VSCode Status Bar 左下角显示的分支名，反映的正是 `HEAD` 当前所在的分支。
 
 一句话：**HEAD 就是“你现在站在哪”的标记。**
 
@@ -432,13 +445,13 @@ graph TD
 
 ---
 
-## Part 5 — 动手环节：登录 GitHub，完成第一次提交（41–50 min）
+## Part 5 — 动手环节：登录 GitHub，完成第一次提交（44–50 min）
 
 这一部分留出真正的上机时间，目标只有一个：**每个人现场完成自己的第一次提交。**（原来的“查看历史”演示融合在动手步骤里。）
 
 ### 5.1 准备：在 VSCode 中登录 GitHub（约 3 分钟）
 
-1. 点击 VSCode 左下角的账户头像图标 → “使用 GitHub 登录（Sign in with GitHub）”。
+1. 点击 VSCode 左下角的账户头像图标 → “Sign in with GitHub”。
 2. 浏览器会打开 GitHub 授权页面，登录并点击 **Authorize visual-studio-code**。
 3. 回到 VSCode，账户图标处显示你的 GitHub 用户名/头像，即登录成功。
 
@@ -447,10 +460,10 @@ graph TD
 ### 5.2 创建仓库并完成第一次提交（约 5 分钟）
 
 1. 新建文件夹 `git-practice`，在 VSCode 中打开：文件 → 打开文件夹。
-2. 命令面板（F1）→ “Git: 初始化仓库”。
-3. 新建 `main.py`，写一行 `print("hello, git")` 并保存——文件立刻出现在源代码管理视图的“更改”列表里。
+2. 打开 Source Control view，点击“Initialize Repository”按钮。
+3. 新建 `main.py`，写一行 `print("hello, git")` 并保存——文件立刻出现在 Source Control view 的“Changes”列表里。
 4. 消息框输入 `Initial commit`，点击 **✓**。
-5. 打开提交图（**···** → “查看提交图”），找到自己刚创建的第一个提交；点击“更改”里的文件还能打开差异视图。
+5. 打开提交图（**···** → “View Commit Graph”），找到自己刚创建的第一个提交；点击“Changes”里的文件还能打开 diff view。
 
 ### 5.3 再来一次，体会暂存区（约 1 分钟，时间允许时）
 
@@ -553,10 +566,10 @@ graph LR
 
 ### 1.3 在 VSCode 中创建和切换分支
 
-在 VSCode 中，分支操作集中在**状态栏左下角的当前分支名**上：
+在 VSCode 中，分支操作集中在**Status Bar 左下角的当前分支名**上：
 
 - 点击分支名，在弹出的下拉列表中选择已有分支，即可切换到该分支。
-- 选择“创建新分支...”，输入 `feature` 并回车，一步完成“创建 + 切换”。
+- 选择“Create New Branch...”，输入 `feature` 并回车，一步完成“创建 + 切换”。
 
 这里可以解释一个容易被误解的地方：
 
@@ -703,11 +716,11 @@ Git 可以处理大量结构清晰、没有歧义的修改；但它无法仅凭�
 
 | 问题 | VSCode 中的操作 |
 | --- | --- |
-| 我修改了文件，但还没有暂存，想丢弃这些修改 | 源代码管理视图中悬停该文件 → 点击 **↩**（放弃更改） |
-| 我已经暂存了修改，但还没有提交，想取消暂存 | 在“暂存的更改”中点击 **−**（取消暂存） |
-| 我已经提交了错误修改，想创建一个反向修改 | 在提交图中右键该提交 → “还原提交（Revert Commit）” |
+| 我修改了文件，但还没有暂存，想丢弃这些修改 | Source Control view 中悬停该文件 → 点击 **↩**（Discard Changes） |
+| 我已经暂存了修改，但还没有提交，想取消暂存 | 在“Staged Changes”中点击 **−**（取消暂存） |
+| 我已经提交了错误修改，想创建一个反向修改 | 在提交图中右键该提交 → “Revert Commit” |
 
-对于最后一种情况，最值得向初学者介绍的是**还原提交（revert）**：在提交图中右键目标提交，选择“还原提交”（如果你的提交图右键菜单中没有该选项，可以安装 Git Graph 扩展，同样是右键 → Revert Commit）。
+对于最后一种情况，最值得向初学者介绍的是**还原提交（revert）**：在提交图中右键目标提交，选择“Revert Commit”（如果你的提交图右键菜单中没有该选项，可以安装 Git Graph 扩展，同样是右键 → Revert Commit）。
 
 它会创建一个新的提交，用于撤销指定提交所引入的修改。
 
@@ -720,7 +733,7 @@ graph LR
 
 假设 D 是一次错误提交。
 
-对 D 执行“还原提交”后，历史会继续向前：
+对 D 执行“Revert Commit”后，历史会继续向前：
 
 ```mermaid
 graph LR
@@ -773,8 +786,8 @@ E 是一个新提交，其作用是反向撤销 D 的修改。
 
 例如，你完全可以在没有网络的情况下，只用 VSCode 完成：
 
-1. 命令面板（F1）→ “Git: 初始化仓库”，在当前文件夹创建仓库。
-2. 在源代码管理视图点击“更改”标题栏的 **+**（暂存所有更改）。
+1. 打开 Source Control view，点击“Initialize Repository”按钮，在当前文件夹创建仓库。
+2. 在 Source Control view 点击“Changes”标题栏的 **+**（Stage All Changes）。
 3. 输入提交信息 `Initial commit`，点击 **✓** 提交。
 
 这些操作不需要 GitHub。
@@ -815,11 +828,7 @@ A 和 B 都可以在本地创建提交、查看历史、切换分支——哪怕
 
 这就是 remote：一条命名的远程仓库连接配置。
 
-在 VSCode 中，命令面板（F1）→ “Git: 管理远程仓库（Manage Remotes）”即可查看已配置的远程仓库及其地址，也可以在这里添加或修改。
-
-克隆 GitHub 仓库时：命令面板（F1）→ “Git: 克隆（Clone）”，粘贴仓库地址并选择本地存放路径。
-
-Git 会在本地创建一个仓库，并通常将来源仓库配置为名为 `origin` 的 remote。
+其实 Session 1 的上机练习（2.5）里，remote 已经悄悄工作过两次：clone 时 Git 自动把来源仓库配置为名为 `origin` 的 remote；选择 fork 推送时，VS Code 又自动把你自己 GitHub 账号下的仓库关联了进来——全程没有一步手动的“配置远程”操作。
 
 这里要强调：
 
@@ -843,7 +852,7 @@ Git 会在本地创建一个仓库，并通常将来源仓库配置为名为 `or
 
 第一个问题：我在本地完成了一些提交，怎么让别人、让 GitHub 也看到？
 
-在 VSCode 中：第一次推送时，点击状态栏的“发布分支（Publish Branch）”；之后可以点击“同步更改”，或通过源代码管理视图 **···** → “拉取、推送” → “推送（Push）”。
+在 VSCode 中：第一次推送时，点击 Status Bar 的“Publish Branch”；之后可以点击 “Sync Changes”，或通过 Source Control view **···** → “Pull, Push” → “Push”。
 
 概念上，它会将远程仓库尚未拥有的必要 Git 对象传过去，并更新远程引用，但具体更新还会受到目标分支、权限和服务器规则等因素影响。
 
@@ -853,7 +862,7 @@ Git 会在本地创建一个仓库，并通常将来源仓库配置为名为 `or
 
 第二个问题：别人可能已经往远程推送了新提交，我怎么知道？
 
-在 VSCode 中：源代码管理视图 **···** → “拉取、推送” → “抓取（Fetch）”。
+在 VSCode 中：Source Control view **···** → “Pull, Push” → “Fetch”。
 
 它会获取远程的新提交和相关对象，并更新相应的远程跟踪引用。
 
@@ -877,7 +886,7 @@ graph LR
 
 第三个问题：远程的更新拿到了，怎么把它整合进我当前的工作分支？
 
-在 VSCode 中：源代码管理视图 **···** → “拉取（Pull）”，或直接点击“同步更改（Sync Changes）”按钮（一次完成拉取 + 推送）。
+在 VSCode 中：Source Control view **···** → “Pull”，或直接点击“Sync Changes”按钮（一次完成拉取 + 推送）。
 
 在常见配置下，拉取可以理解为：
 
@@ -924,7 +933,7 @@ Git 处理的是仓库对象、引用和提交历史之间的同步与整合。
 ```mermaid
 flowchart TD
     EF["Edit Files"] --> WT["Working Tree"]
-    WT -->|"Stage（源代码管理视图 +）"| SA["Staging Area"]
+    WT -->|"Stage（Source Control view +）"| SA["Staging Area"]
     SA -->|"Commit（消息框 + ✓）"| LR["Local Repository"]
     LR --> BR["Branch"]
     LR --> HIS["History"]
@@ -975,7 +984,7 @@ flowchart TD
 | --- | --- |
 | 为什么需要版本控制 | 详细 |
 | Working Tree / Staging Area / Repository | 详细 |
-| 暂存、提交、查看状态与差异（源代码管理视图） | 理解并演示 |
+| 暂存、提交、查看状态与差异（Source Control view） | 理解并演示 |
 | `.gitignore` 与 `.git` 目录 | 知道用途即可 |
 | 一次提交 = 快照 + 说明 | 一句话概括 |
 | 提交 ID 像指纹 | 点到为止 |
@@ -1028,7 +1037,7 @@ print("Hello")
 操作顺序（全部在 VSCode 中完成）：
 
 1. 将文件修改为 `print("Hello, Git")`。
-2. 在源代码管理视图中点击 `main.py` 旁的 **+**（暂存）。
+2. 在 Source Control view 中点击 `main.py` 旁的 **+**（暂存）。
 3. 再把文件修改为 `print("Hello, Git!")`。
 4. 输入提交信息 `Update greeting`，点击 **✓** 提交。
 
@@ -1050,7 +1059,7 @@ graph LR
     main(["main"]) --> C
 ```
 
-操作：点击状态栏左下角的分支名 → “创建新分支...” → 输入 `feature`（VSCode 创建后会自动切换到新分支）。
+操作：点击Status Bar 左下角的分支名 → “Create New Branch...” → 输入 `feature`（VSCode 创建后会自动切换到新分支）。
 
 提问：
 
@@ -1102,7 +1111,7 @@ graph LR
 
 提问：
 
-> 在 VSCode 中点击“抓取”后，本地的 `main` 会不会自动指向 D？
+> 在 VSCode 中点击 “Fetch”后，本地的 `main` 会不会自动指向 D？
 
 接着再解释 remote-tracking branch 和 pull。
 
@@ -1120,9 +1129,10 @@ graph LR
 | --- | --- | --- |
 | 0–10 min | The Problem | 飞书/Word 的历史版本；代码为什么需要专门工具；SVN 一句带过 |
 | 10–25 min | The Three Areas | Working Tree、Staging Area、Repository；暂存与提交；`.gitignore` 与 `.git` |
-| 25–33 min | What Is a Commit? | 快照 + 说明；提交 ID 像指纹 |
-| 33–41 min | History and References | 提交链、分支书签、HEAD |
-| 41–50 min | Hands-on | GitHub 登录、初始化仓库、第一次提交；三个收尾问题 |
+| 25–32 min | Clone & Push Exercise | Command Palette（Win/Mac 快捷键）克隆本仓库；fork 并推送到自己的 GitHub |
+| 32–38 min | What Is a Commit? | 快照 + 说明；提交 ID 像指纹 |
+| 38–44 min | History and References | 提交链、分支书签、HEAD |
+| 44–50 min | Hands-on | GitHub 登录、初始化仓库、第一次提交；三个收尾问题 |
 
 ## Session 2 — Branching, Merging and Remote Repositories
 
@@ -1180,7 +1190,7 @@ Force push 会用本地历史**直接覆盖**远程分支历史。如果其他�
 
 ## 开启步骤
 
-1. 打开设置：`Ctrl+,`（macOS 为 `Cmd+,`），或命令面板（F1）→ “首选项: 打开设置”。
+1. 打开设置：`Ctrl+,`（macOS 为 `Cmd+,`）。
 2. 搜索 `force push`。
 3. 勾选 **Git: Allow Force Push**（对应设置项 `git.allowForcePush`）。
 4. 建议同时保持勾选 **Git: Use Force Push With Lease**（对应 `git.useForcePushWithLease`，默认开启）。开启后，VSCode 的“强制推送”默认使用 `--force-with-lease`：如果远程分支在你不知情的情况下又有了新提交，推送会失败而不是直接覆盖，更安全。
@@ -1197,8 +1207,8 @@ Force push 会用本地历史**直接覆盖**远程分支历史。如果其他�
 
 开启设置后，强制推送入口才会出现：
 
-- 源代码管理视图 **···** → “拉取、推送” → “强制推送（Force Push）”；
-- 或命令面板（F1）→ 输入 “强制推送”，可以选择具体变体（例如 Force Push、Force Push (With Lease)）。
+- Source Control view **···** → “Pull, Push” → “Force Push”；
+- 或 Command Palette（F1）→ 输入 “force push”，可以选择具体变体（例如 Force Push、Force Push (With Lease)）。
 
 ## 教学提醒
 

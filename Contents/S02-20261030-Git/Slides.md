@@ -218,7 +218,7 @@ Account icon (bottom-left) → Sign in with GitHub → authorize in the browser.
 
 ### 2 · INIT
 
-New folder `git-practice` → open in VS Code → Git: Initialize Repository.
+New folder `git-practice` → open in VS Code → Source Control view → click Initialize Repository.
 
 ### 3 · COMMIT
 
