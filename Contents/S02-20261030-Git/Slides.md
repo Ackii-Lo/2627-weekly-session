@@ -2,28 +2,79 @@
 marp: true
 theme: cpu
 paginate: true
+html: true
 ---
 
 <style>
-/* deck-wide: no brand frame on standalone images */
-p > img:only-child {
-  border: none;
-  box-shadow: none;
-}
-
-/* every image keeps its natural aspect at the directed size — never
-   shrunk or squeezed; larger than the page simply overflows */
-img {
-  max-width: none;
-  max-height: none;
-}
-
-/* side-pinned images: vertically centred */
+/* deck preference: side-pinned images vertically centred and never capped */
 section.side img {
   top: 50%;
   transform: translateY(-50%);
+  max-width: none;
+  max-height: none;
 }
 </style>
+
+<!-- Mermaid loader: renders fenced ```mermaid blocks as diagrams in the
+     code-block card, CPU brand colors. Works in CLI exports and the HTML
+     export; the VS Code preview (no scripts) shows the source card. -->
+
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+<script>
+mermaid.initialize({
+  startOnLoad: false,
+  theme: 'base',
+  themeVariables: {
+    fontFamily: "'Noto Sans SC','PingFang SC','Hiragino Sans',sans-serif",
+    fontSize: '24px',
+    primaryColor: '#fdfaf0',
+    primaryBorderColor: '#111111',
+    primaryTextColor: '#111111',
+    secondaryColor: '#f9dd74',
+    secondaryBorderColor: '#111111',
+    secondaryTextColor: '#111111',
+    tertiaryColor: '#fdf6dd',
+    tertiaryBorderColor: '#e3d5a8',
+    tertiaryTextColor: '#111111',
+    lineColor: '#111111',
+    textColor: '#111111',
+    edgeLabelBackground: '#f9dd74',
+    clusterBkg: '#fdf6dd',
+    clusterBorder: '#e3d5a8',
+    actorBkg: '#fdfaf0',
+    actorBorder: '#111111',
+    actorTextColor: '#111111',
+    actorLineColor: '#a3a3a3',
+    signalColor: '#111111',
+    signalTextColor: '#111111',
+    noteBkgColor: '#f9dd74',
+    noteBorderColor: '#111111',
+    activationBkgColor: '#f9dd74',
+    activationBorderColor: '#111111',
+    sequenceNumberColor: '#111111',
+    taskBkgColor: '#f9dd74',
+    taskBorderColor: '#111111',
+    taskTextColor: '#111111',
+    todayLineColor: '#111111',
+    gridColor: '#a3a3a3'
+  }
+});
+const renderMermaid = () => {
+  document.querySelectorAll('pre.mermaid, pre > code.language-mermaid').forEach((el) => {
+    const pre = el.tagName === 'PRE' ? el : el.parentElement;
+    const container = document.createElement('div');
+    container.className = 'mermaid';
+    container.textContent = pre.textContent.trim();
+    pre.replaceWith(container);
+  });
+  mermaid.run();
+};
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', renderMermaid);
+} else {
+  renderMermaid();
+}
+</script>
 
 <!-- _class: lead -->
 <!-- Cover: CPU weekly session 02, presenter Siyuan He (Robert), 30 October 2026 -->
@@ -43,7 +94,7 @@ Computer Psycho Union · 30 October 2026
 ---
 
 <!-- _class: agenda -->
-<!-- Agenda: seven items, first row auto-highlighted -->
+<!-- Agenda: five items, first row auto-highlighted -->
 
 ## What we will cover
 
@@ -51,7 +102,7 @@ Computer Psycho Union · 30 October 2026
 2. Stage and commit in VS Code *GUI only, no commands*
 3. What a commit really is *snapshots and fingerprints*
 4. Branches and merging *when history forks*
-5. Git and GitHub *push · fetch · pull*
+5. Git and GitHub *push · fetch · pull · stash*
 
 ---
 
@@ -73,7 +124,7 @@ Why Git exists · how a commit is born · your first commit
 
 <style scoped>
 section.side {
-  padding-left: 590px;
+  padding-left: 610px;
 }
 section.side img {
   right: auto;
@@ -99,7 +150,7 @@ Autosave plus version history — mistakes become reversible.
 
 ---
 
-<!-- Regular content page -->
+<!-- Regular content page: landscape image below the text -->
 
 ## 02 · Why code needs its own tool
 
@@ -114,19 +165,24 @@ Autosave plus version history — mistakes become reversible.
 
 ---
 
-<!-- Regular content page -->
+<!-- Regular content page: mermaid below the text -->
 
 ## 03 · The old-school way
 
-- `main.py` → `main_old.py` → `main_new.py` → `main_final.py` → `main_final_really_final.py`
+- **Save-as forever** — every "final" version is a new file
 - **Copy the folder** — `project_backup_before_refactor/`
 - *Which one is real? What changed? How do I go back?*
+
+```mermaid
+graph LR
+  A["main.py"] --> B["main_old.py"] --> C["main_new.py"] --> D["main_final.py"] --> E["main_final_really_final.py"]
+```
 
 **Version control manages change and history — not backups.**
 
 ---
 
-<!-- Regular content page -->
+<!-- Regular content page: mermaid below the text -->
 
 ## 04 · Meet Git (and its ancestor SVN)
 
@@ -136,15 +192,34 @@ Autosave plus version history — mistakes become reversible.
 
 *Centralized vs distributed — the full table in Session 2.*
 
+<div class="columns">
+<div class="column">
+
+![w:240](assets/logo-svn.svg)
+
+*SVN — centralized*
+
+</div>
+<div class="column">
+
+![w:240](assets/logo-git.svg)
+
+*Git — distributed*
+
+</div>
+</div>
+
 ---
 
-<!-- Regular content page -->
+<!-- Regular content page: mermaid below the text -->
 
 ## 05 · Two places, one click
 
 - **Working Tree** — the files you are editing *your desk*
 - **Local Repository** — the saved commit history *the archive*
 - **Demo** — edit `main.py` · type a message · Commit — a new commit exists
+
+![w:760](assets/ph-two-places.svg)
 
 *Saving a file is not recording history. Committing is.*
 
@@ -153,7 +228,7 @@ Autosave plus version history — mistakes become reversible.
 <!-- _class: side -->
 <!-- Side image: replace assets/ph-vscode-scm.svg with a real screenshot -->
 
-![height:720px](assets/ph-vscode-scm.svg)
+![height:700px](assets/ph-vscode-scm.svg)
 
 ## 06 · The hidden third place
 
@@ -161,15 +236,15 @@ Autosave plus version history — mistakes become reversible.
 
 Bug fix, new feature, README tweak — commit only the fix.
 
+<br/>
+
 ### THE ANSWER
 
 Stage (+) picks what the next commit contains. Your one-click commit was staging everything silently.
 
-#### STAGE
-
 ---
 
-<!-- Regular content page -->
+<!-- Regular content page: mermaid below the text -->
 
 ## 07 · Edit, stage, commit
 
@@ -178,12 +253,13 @@ Stage (+) picks what the next commit contains. Your one-click commit was staging
 - **Commit (check)** — write history with a message
 - *Fine-grained: stage single hunks in the diff view*
 
+![w:760](assets/ph-stage-commit.svg)
+
 **A commit is chosen, not dumped.**
 
 ---
 
-<!-- Regular content page -->
-<!-- .gitignore and .git — replaces the former TODO marker -->
+<!-- Regular content page: landscape placeholder below the text -->
 
 ## 08 · Keep some files out of history
 
@@ -191,9 +267,11 @@ Stage (+) picks what the next commit contains. Your one-click commit was staging
 - **`.git`** — the hidden folder where the whole history lives *never edit it, never commit it*
 - *In VS Code: create `.gitignore` in the repo root — those files vanish from Changes*
 
+![w:760](assets/ph-gitignore.svg)
+
 ---
 
-<!-- Regular content page -->
+<!-- Regular content page: mermaid below the text -->
 
 ## 09 · What a commit really is
 
@@ -201,11 +279,24 @@ Stage (+) picks what the next commit contains. Your one-click commit was staging
 - **A snapshot** — the whole project at that moment
 - **Plus a note** — who, when, what and why
 
+```mermaid
+graph LR
+  subgraph CA["Commit A — snapshot + note"]
+    F1["main.py"]
+    F2["utils.py"]
+  end
+  subgraph CB["Commit B — snapshot + note"]
+    G1["main.py"]
+    G2["utils.py"]
+  end
+  CA -.-> CB
+```
+
 *A commit = a snapshot + a message.*
 
 ---
 
-<!-- Regular content page -->
+<!-- Regular content page: mermaid below the text -->
 
 ## 10 · The commit ID is a fingerprint
 
@@ -213,19 +304,58 @@ Stage (+) picks what the next commit contains. Your one-click commit was staging
 - **One character changed, whole ID changes** — tamper-evident
 - **No way back from ID to content** — a fingerprint, not a zip
 
+```mermaid
+graph LR
+  C["content"] --> H["hash"] --> I["ID · a1b2c3d"]
+```
+
 *Hash underneath: SHA-1, or SHA-256 on newer repos — names only.*
 
 ---
 
-<!-- Regular content page -->
+<!-- Regular content page: mermaid below the text -->
 
-## 11 · History, bookmarks, you
+## 11 · History is a line
 
-- **History** — every commit remembers its previous one `A → B → C → D`
-- **Branch** — a movable bookmark stuck on a commit *creating one copies nothing*
-- **HEAD** — the bookmark you are standing on *VS Code status bar, bottom-left*
+- Every commit remembers its **previous** one
+- The line only grows — nothing in the middle is ever edited
 
-*When does the line fork? After the break.*
+```mermaid
+graph LR
+  A --> B --> C --> D
+```
+
+*So when does the line fork? After the break.*
+
+---
+
+<!-- Regular content page: mermaid below the text -->
+
+## 12 · A branch is a movable bookmark
+
+- A branch is **not a copy** of the project — it is a bookmark on a commit
+- Creating and moving it costs almost nothing
+
+```mermaid
+graph LR
+  A --> B --> C --> D
+  main(["main"]) --> D
+```
+
+---
+
+<!-- Regular content page: mermaid below the text -->
+
+## 13 · HEAD: where you stand
+
+- **HEAD** — the bookmark you are currently standing on
+- It decides where your next commit lands *VS Code status bar, bottom-left*
+
+```mermaid
+graph TD
+  HEAD(["HEAD"]) --> main(["main"])
+  main --> D["Commit D"]
+```
 
 ---
 
@@ -245,7 +375,10 @@ Everyone leaves this room with one commit on their machine
 <!-- _class: activities -->
 <!-- Hands-on steps: four groups -->
 
-## 12 · Fifteen minutes, four steps
+## 14 · Fifteen minutes, four steps
+
+<div class="columns">
+<div class="column">
 
 ### 1 · SIGN IN
 
@@ -255,6 +388,9 @@ Account icon (bottom-left) → Sign in with GitHub → authorize in the browser.
 
 New folder `git-practice` → open in VS Code → Source Control view → click Initialize Repository.
 
+</div>
+<div class="column">
+
 ### 3 · COMMIT
 
 Create `main.py` → stage → `Initial commit` → find it in the graph.
@@ -263,11 +399,16 @@ Create `main.py` → stage → `Initial commit` → find it in the graph.
 
 Two files, two commits — you choose what each one contains.
 
+</div>
+</div>
+
+*No Git yet? Click Download Git in the prompt and follow it.*
+
 ---
 
 <!-- Regular content page -->
 
-## 13 · Before the break
+## 15 · Before the break
 
 - Why are **stage** and **commit** two separate steps?
 - What does a commit store — keystrokes, or a snapshot?
@@ -307,7 +448,7 @@ Branches · merging · conflicts · GitHub
 
 ![height:685px](assets/ph-commit-graph.png)
 
-## 14 · When history forks
+## 16 · When history forks
 
 ### SEVERAL LINES AT ONCE
 
@@ -321,22 +462,58 @@ History stops being a line and becomes a graph — a family tree, a river delta.
 
 ---
 
-<!-- Regular content page -->
+<!-- Regular content page: mermaid below the text -->
 
-## 15 · A branch is just a bookmark
+## 17 · Branch: try safely, switch fast
 
 - **Try safely** — new algorithm on the side, the stable line untouched
-- **Nothing is copied** — a branch is a movable bookmark, near zero cost
+- **Nothing is copied** — a branch is just another bookmark
 - **In VS Code** — click the branch name (bottom-left) → Create Branch
+<br/>
+
+![width:1050](assets/branches.png)
+
+```mermaid
+graph LR
+  A --> B --> C
+  C --> D --> E
+  main(["main"]) --> C
+  feature(["feature"]) --> E
+```
 
 ---
 
-<!-- Regular content page -->
+<!-- Regular content page: mermaid below the text -->
 
-## 16 · Merge: bring lines together
+## 18 · Merge A: fast-forward
 
-- **Fast-forward** — your line never moved: the bookmark simply slides forward
-- **Three-way merge** — both lines moved: base, yours, theirs → one merge commit
+- Your line never moved — Git just **slides the bookmark forward**
+- No new commit is created
+
+```mermaid
+graph LR
+  A --> B --> C --> D --> E
+  main(["main"]) --> C
+  feature(["feature"]) --> E
+```
+
+---
+
+<!-- Regular content page: mermaid below the text -->
+
+## 19 · Merge B: three-way
+
+- Both lines moved — Git compares **base, yours, theirs**
+- The result is one new **merge commit** with two parents
+
+```mermaid
+graph LR
+  A --> B --> C
+  C --> D["main"]
+  C --> E["feature"]
+  D --> M["merge commit"]
+  E --> M
+```
 
 ---
 
@@ -345,7 +522,7 @@ History stops being a line and becomes a graph — a family tree, a river delta.
 
 ![height:720px](assets/ph-conflict.svg)
 
-## 17 · Conflicts are not errors
+## 20 · Conflicts are not errors
 
 ### SAME LINES, DIFFERENT WISHES
 
@@ -359,9 +536,39 @@ Resolve, stage, commit — history moves on.
 
 ---
 
-<!-- Regular content page with table -->
+<!-- Regular content page: landscape placeholder below the text -->
 
-## 18 · Git is not GitHub
+## 21 · Two small undos
+
+- **Discard (undo arrow)** — drop changes you never staged
+- **Unstage (minus)** — take things out of the next commit
+
+![w:760](assets/ph-discard.svg)
+
+*Both live on the file rows in Source Control — hover to see them.*
+
+---
+
+<!-- Regular content page: mermaid below the text -->
+
+## 22 · Undo Last Commit
+
+- Source Control **`···`** → Commit → **Undo Last Commit**
+- The commit unwraps: history goes back one step, the **changes wait in Staged Changes**
+
+```mermaid
+graph LR
+  A --> B --> C --> D["D — the mistake"]
+  D -.->|"Undo Last Commit"| S["changes → Staged Changes"]
+```
+
+*Unwrapping a commit loses nothing. Pushed already? Fix forward — rewriting shared history needs force push.*
+
+---
+
+<!-- Regular content page with table + mermaid -->
+
+## 23 · Git is not GitHub
 
 | Git | GitHub |
 | --- | --- |
@@ -369,13 +576,20 @@ Resolve, stage, commit — history moves on.
 | Runs locally, works offline | Stores remotes, enables sharing |
 | Your history lives with you | The meeting place for histories |
 
+```mermaid
+graph LR
+  L["Git — on your machine"]
+  GH["GitHub — in the cloud"]
+  L -.->|"Push / Pull — optional"| GH
+```
+
 - *Committing needs no internet*
 
 ---
 
 <!-- Regular content page with table -->
 
-## 19 · Distributed: Git vs SVN
+## 24 · Distributed: Git vs SVN
 
 | | SVN | Git |
 | --- | --- | --- |
@@ -387,13 +601,22 @@ Resolve, stage, commit — history moves on.
 
 ---
 
-<!-- Regular content page -->
+<!-- Regular content page: mermaid below the text -->
 
-## 20 · Remote: who do I sync with?
+## 25 · Remote: who do I sync with?
 
 - A **remote** is a named link to another repository
 - `origin` is just the default name — nothing magical
 - **In VS Code** — cloning already wired `origin` for you
+
+```mermaid
+graph LR
+  R["your repository"]
+  O(["origin"])
+  GH["github.com/CompPsyUnion/2627-weekly-session"]
+  R --- O
+  O --- GH
+```
 
 ---
 
@@ -402,56 +625,93 @@ Resolve, stage, commit — history moves on.
 
 ![height:720px](assets/ph-pushpull.svg)
 
-## 21 · Push, fetch, pull
+## 26 · Push: publish your commits
 
-### PUSH
+### THE QUESTION
 
-Publish your new commits.
+I finished commits locally — how do others see them?
 
-### FETCH
+<br/>
 
-See the remote's new commits — your branch stays put.
+### THE ENTRIES
 
-### PULL
-
-Fetch and integrate — the lines meet again.
-
-#### SYNC
+Status Bar → Publish Branch · Source Control **`···`** → Pull, Push → Push.
 
 ---
 
-<!-- Regular content page -->
+<!-- Regular content page: mermaid below the text -->
 
-## 22 · Three ways back
+## 27 · Fetch: look, don't merge
 
-- **Discard (undo arrow)** — drop uncommitted changes
-- **Unstage (minus)** — take things out of the next commit
-- **Undo Last Commit** — SCM menu **···** → Commit: the commit unwraps back to Staged Changes
+- Downloads the remote's new commits and moves **origin/main**
+- Your own **main** stays exactly where it was
 
-*Unwrapping a commit loses nothing — the changes wait in Staged Changes.*
-
----
-
-<!-- Regular content page -->
-
-## 23 · The whole picture
-
-```text
-edit files → working tree → (+ stage) → commit → local repository
-                                                      ↓
-                                            push · fetch · pull
-                                                      ↓
-                                                  GitHub
+```mermaid
+graph LR
+  om(["origin/main"]) --> D["Commit D"]
+  main(["main"]) --> C["Commit C"]
 ```
 
-- *Everything from today lives somewhere on this line.*
+---
+
+<!-- Regular content page: mermaid below the text -->
+
+## 28 · Pull: fetch and integrate
+
+- Fetch first, then integrate: fast-forward, or a merge
+- Your line and the remote line meet again
+
+```mermaid
+graph LR
+  A --> B --> C["C · your main"]
+  B --> D["D · remote main"]
+```
+
+---
+
+<!-- Regular content page: mermaid below the text -->
+
+## 29 · Stash: clear the desk
+
+- Remote box arrives, but unpacked clothes sit on yours — **Pull refuses to stack**
+- **Stash** the clothes, **Pull** the box, **Pop** the clothes back
+
+```mermaid
+graph LR
+  W["uncommitted changes"] -.->|"1 · Stash"| ST["on the shelf"]
+  R["remote updates"] -->|"2 · Pull"| L["your history"]
+  ST -.->|"3 · Pop"| W2["changes are back"]
+```
+
+*Source Control ··· → Stash → Stash / Pop Latest Stash.*
+
+---
+
+<!-- Regular content page: mermaid is the whole point -->
+
+## 30 · The whole picture
+
+```mermaid
+flowchart TD
+  EF["Edit Files"] --> WT["Working Tree"]
+  WT -->|"+ Stage"| SA["Staging Area"]
+  SA -->|"✓ Commit"| LR["Local Repository"]
+  LR --> BR["Branch"]
+  LR --> UL["Undo Last Commit"]
+  LR -->|"Push / Fetch / Pull"| RR["GitHub"]
+```
+
+- *Everything from today lives somewhere on this map.*
 
 ---
 
 <!-- _class: activities -->
-<!-- Final exercise: clone / fork / push — mirrors ref Part 7 -->
+<!-- Final exercise: clone / fork / push — mirrors Session-2 Part 7 -->
 
-## 24 · Clone this repo, push to yours
+## 31 · Clone this repo, push to yours
+
+<div class="columns">
+<div class="column">
 
 ### 1 · CLONE
 
@@ -459,24 +719,28 @@ Command Palette — `Ctrl+Shift+P` (Win) / `Cmd+Shift+P` (Mac) →
 
 "Git: Clone" → paste the repo URL.
 
+<br/>
+
 ### 2 · COMMIT
 
 Make a small change → stage → commit.
 
----
-
-<!-- _class: activities -->
-<!-- Final exercise, page 2: push, then check your GitHub -->
-
-## 25 · Push, then check
+</div>
+<div class="column">
 
 ### 3 · PUSH
 
 Click "Sync Changes" → no write permission? → **Create Fork**.
 
+<br/>
+<br/>
+
 ### 4 · CHECK
 
 Visit `github.com/<your-username>` — your commit is there.
+
+</div>
+</div>
 
 *The whole course, one loop: clone → commit → fork → push.*
 

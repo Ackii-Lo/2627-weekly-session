@@ -223,21 +223,19 @@ tr:nth-child(even) td {
 
 /* ---------- inline images ---------- */
 
-/* ![width:...]() / ![height:...]() inline images stay inside the column and
-   on the slide whatever their natural size */
+/* no frame, no shrinking: an image renders at exactly the size its w:/h:
+   directive gives (its natural size with no directive) — if it runs past
+   the right edge or the bottom of the slide, it simply overflows */
 img {
-  max-width: 100%;
-  max-height: 430px;
   vertical-align: middle;
 }
 
-/* an image standing alone in its paragraph is centered and gets the brand
-   frame shared with code blocks and tables */
+/* an image standing alone in its paragraph (usually sitting below the
+   text) is centered horizontally; an image placed to the side inside a
+   .columns block is centered vertically by that block's flex rule */
 p > img:only-child {
   display: block;
   margin: 14px auto 4px;
-  border: 2.5px solid var(--ink);
-  box-shadow: 7px 7px 0 var(--yellow);
 }
 
 /* ---------- two-column blocks ---------- */
@@ -309,7 +307,7 @@ section.side p {
 
 /* the pinned side image: right edge, full height; the height (or width)
    directive decides its rendered size, the caps below catch directive-less
-   images; overrides the inline-image frame — a poster frames itself */
+   images */
 section.side img {
   position: absolute;
   top: 0;
@@ -317,8 +315,6 @@ section.side img {
   max-height: 100%;
   max-width: 45%;
   margin: 0;
-  border: none;
-  box-shadow: none;
 }
 
 section.side p > img:only-child {
@@ -612,8 +608,12 @@ section.yellow p {
 }
 
 /* ---------- code blocks (macOS window style) ---------- */
+/* the same window card also wraps rendered mermaid diagrams (div.mermaid,
+   swapped in by the loader script from template.md); an unrendered
+   pre.mermaid fallback picks these styles up for free */
 
-pre {
+pre,
+div.mermaid {
   position: relative;
   margin: 16px 0 14px;
   padding: 58px 26px 22px;
@@ -626,7 +626,8 @@ pre {
   overflow: hidden;
 }
 
-pre::before {
+pre::before,
+div.mermaid::before {
   content: '';
   position: absolute;
   inset: 0 0 auto 0;
@@ -638,6 +639,15 @@ pre::before {
     radial-gradient(circle at 26px 20px, #ff5f57 0 6px, transparent 6.5px),
     radial-gradient(circle at 48px 20px, #febc2e 0 6px, transparent 6.5px),
     radial-gradient(circle at 70px 20px, #28c840 0 6px, transparent 6.5px);
+}
+
+div.mermaid {
+  text-align: center;
+}
+
+div.mermaid svg {
+  max-width: 100%;
+  height: auto;
 }
 
 pre code {

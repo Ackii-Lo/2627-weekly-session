@@ -59,6 +59,7 @@
         "yzhang"
     ],
     "markdown.marp.exportType": "html",
+    "markdown.marp.enableHtml": true,
     "markdown.marp.html": "all",
     "markdown.marp.pdf.outlines": "both",
     "markdown.marp.pptx.editable": "smart",
