@@ -18,7 +18,7 @@ img {
   max-height: none;
 }
 
-/* side-pinned images: vertically centered */
+/* side-pinned images: vertically centred */
 section.side img {
   top: 50%;
   transform: translateY(-50%);
@@ -73,7 +73,7 @@ Why Git exists · how a commit is born · your first commit
 
 <style scoped>
 section.side {
-  padding-left: 640px;
+  padding-left: 590px;
 }
 section.side img {
   right: auto;
@@ -83,7 +83,7 @@ section.side img {
 
 ![width:560px](assets/feishu.png)
 
-## 01 · Version history you already know
+## 01 · Version history that YOU ALREADY KNOW
 
 ### THE PANEL YOU NEVER NAMED
 
@@ -359,21 +359,9 @@ Resolve, stage, commit — history moves on.
 
 ---
 
-<!-- Regular content page -->
-
-## 18 · Three ways back
-
-- **Discard (undo arrow)** — drop uncommitted changes
-- **Unstage (minus)** — take things out of the next commit
-- **Revert** — right-click a commit in the graph: a new commit that cancels it
-
-*Git corrects history by adding history.*
-
----
-
 <!-- Regular content page with table -->
 
-## 19 · Git is not GitHub
+## 18 · Git is not GitHub
 
 | Git | GitHub |
 | --- | --- |
@@ -387,7 +375,7 @@ Resolve, stage, commit — history moves on.
 
 <!-- Regular content page with table -->
 
-## 20 · Distributed: Git vs SVN
+## 19 · Distributed: Git vs SVN
 
 | | SVN | Git |
 | --- | --- | --- |
@@ -401,11 +389,11 @@ Resolve, stage, commit — history moves on.
 
 <!-- Regular content page -->
 
-## 21 · Remote: who do I sync with?
+## 20 · Remote: who do I sync with?
 
 - A **remote** is a named link to another repository
 - `origin` is just the default name — nothing magical
-- **VS Code** — Command Palette → Git: Manage Remotes
+- **In VS Code** — cloning already wired `origin` for you
 
 ---
 
@@ -414,7 +402,7 @@ Resolve, stage, commit — history moves on.
 
 ![height:720px](assets/ph-pushpull.svg)
 
-## 22 · Push, fetch, pull
+## 21 · Push, fetch, pull
 
 ### PUSH
 
@@ -429,6 +417,18 @@ See the remote's new commits — your branch stays put.
 Fetch and integrate — the lines meet again.
 
 #### SYNC
+
+---
+
+<!-- Regular content page -->
+
+## 22 · Three ways back
+
+- **Discard (undo arrow)** — drop uncommitted changes
+- **Unstage (minus)** — take things out of the next commit
+- **Undo Last Commit** — SCM menu **···** → Commit: the commit unwraps back to Staged Changes
+
+*Unwrapping a commit loses nothing — the changes wait in Staged Changes.*
 
 ---
 
@@ -466,7 +466,9 @@ Make a small change → stage → commit.
 ---
 
 <!-- _class: activities -->
-<!-- Final exercise: clone / fork / push — mirrors ref Part 7 -->
+<!-- Final exercise, page 2: push, then check your GitHub -->
+
+## 25 · Push, then check
 
 ### 3 · PUSH
 
@@ -506,4 +508,4 @@ Settings → search `force push` → enable Git: Allow Force Push.
 
 Keep Use Force Push With Lease on — it refuses to overwrite unseen commits.
 
-- Full course notes — `Contents/S02-20261030-Git/ref/git-ref.md`
+- Full course notes — `Session-1/` and `Session-2/` in this folder
