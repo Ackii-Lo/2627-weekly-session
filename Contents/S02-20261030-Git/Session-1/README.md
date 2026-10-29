@@ -367,6 +367,14 @@ graph TD
 
 这一部分留出真正的上机时间，目标只有一个：**每个人现场完成自己的第一次 Commit。**
 
+### 5.0 前置检查：电脑上还没装 Git 怎么办（约 2 分钟）
+
+大部分同学打开 VSCode 后 Source Control view 就能直接用；如果它提示 “Download Git” 或弹出 “Git not found. Would you like to install Git?”，说明系统里还没有 Git。
+
+1. 直接点击提示中的 **Download Git** / **Install** 按钮，按提示一步步装完；macOS 若弹出“需要安装命令行开发者工具”的对话框，点“安装”即可，里面自带 Git。
+2. 装完后按提示**重启 VSCode**。
+3. 重新打开 Source Control view，不再出现该提示，就说明 Git 已就绪。
+
 ### 5.1 准备：在 VSCode 中登录 GitHub（约 3 分钟）
 
 1. 点击 VSCode 左下角的账户头像图标 → “Sign in with GitHub”。
@@ -399,4 +407,4 @@ graph TD
 
 > Git records snapshots, connects them into history, and gives us ways to navigate that history.
 
-走动帮同学排障，常见问题：GitHub 没登录成功、文件夹没有在 VSCode 中打开、误把整个主目录初始化成仓库。没跟上的同学可以课后照着 5.1–5.2 补齐，或到仓库 issue 提问。
+走动帮同学排障，常见问题：没装 Git（按 5.0 点提示按钮装好并重启）、GitHub 没登录成功、文件夹没有在 VSCode 中打开、误把整个主目录初始化成仓库。没跟上的同学可以课后照着 5.0–5.2 补齐，或到仓库 issue 提问。
