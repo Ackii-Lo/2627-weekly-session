@@ -4,6 +4,27 @@ theme: cpu
 paginate: true
 ---
 
+<style>
+/* deck-wide: no brand frame on standalone images */
+p > img:only-child {
+  border: none;
+  box-shadow: none;
+}
+
+/* every image keeps its natural aspect at the directed size — never
+   shrunk or squeezed; larger than the page simply overflows */
+img {
+  max-width: none;
+  max-height: none;
+}
+
+/* side-pinned images: vertically centered */
+section.side img {
+  top: 50%;
+  transform: translateY(-50%);
+}
+</style>
+
 <!-- _class: lead -->
 <!-- Cover: CPU weekly session 02, presenter Siyuan He (Robert), 30 October 2026 -->
 
@@ -48,9 +69,19 @@ Why Git exists · how a commit is born · your first commit
 ---
 
 <!-- _class: side -->
-<!-- Side image: replace assets/ph-feishu.svg with a real screenshot -->
+<!-- Feishu screenshot is landscape: pinned LEFT (mirrored layout), width directive -->
 
-![height:720px](assets/ph-feishu.svg)
+<style scoped>
+section.side {
+  padding-left: 640px;
+}
+section.side img {
+  right: auto;
+  left: 0;
+}
+</style>
+
+![width:560px](assets/feishu.png)
 
 ## 01 · Version history you already know
 
@@ -77,6 +108,8 @@ Autosave plus version history — mistakes become reversible.
 - **No parallel tries** — no way to keep two versions alive at once
 - **Merging** — two people, one file: code auto-merges most of it
 
+![w:1080](assets/project-forest.png)
+
 *Version control solves the same problem — for code.*
 
 ---
@@ -99,7 +132,7 @@ Autosave plus version history — mistakes become reversible.
 
 - **SVN — centralized** — one server holds the history; offline means stuck
 - **Git — distributed** — every clone holds the full history
-- **Born 2005** — Linus Torvalds, built for Linux; today's industry standard
+  - **Born 2005** — Linus Torvalds, built for Linux; today's industry standard
 
 *Centralized vs distributed — the full table in Session 2.*
 
