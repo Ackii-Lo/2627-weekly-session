@@ -1,0 +1,1295 @@
+<!DOCTYPE html><html lang="C"><head><title>Git Under the Hood</title><meta property="og:title" content="Git Under the Hood"><meta charset="UTF-8"><meta name="viewport" content="width=device-width,height=device-height,initial-scale=1.0"><meta name="apple-mobile-web-app-capable" content="yes"><meta http-equiv="X-UA-Compatible" content="ie=edge"><meta property="og:type" content="website"><meta name="twitter:card" content="summary"><style>@media screen{body[data-bespoke-view=""] .bespoke-marp-parent>.bespoke-marp-osc>button,body[data-bespoke-view=next] .bespoke-marp-parent>.bespoke-marp-osc>button,body[data-bespoke-view=presenter] .bespoke-marp-presenter-container .bespoke-marp-presenter-info-container button,body[data-bespoke-view=presenter] .bespoke-marp-presenter-container .bespoke-marp-presenter-note-container button{appearance:none;background-color:initial;border:0;color:inherit;cursor:pointer;font-size:inherit;opacity:.8;outline:none;padding:0;transition:opacity .2s linear;-webkit-tap-highlight-color:transparent}body[data-bespoke-view=""] .bespoke-marp-parent>.bespoke-marp-osc>button:disabled,body[data-bespoke-view=next] .bespoke-marp-parent>.bespoke-marp-osc>button:disabled,body[data-bespoke-view=presenter] .bespoke-marp-presenter-container .bespoke-marp-presenter-info-container button:disabled,body[data-bespoke-view=presenter] .bespoke-marp-presenter-container .bespoke-marp-presenter-note-container button:disabled{cursor:not-allowed;opacity:.15!important}body[data-bespoke-view=""] .bespoke-marp-parent>.bespoke-marp-osc>button:hover,body[data-bespoke-view=next] .bespoke-marp-parent>.bespoke-marp-osc>button:hover,body[data-bespoke-view=presenter] .bespoke-marp-presenter-container .bespoke-marp-presenter-info-container button:hover,body[data-bespoke-view=presenter] .bespoke-marp-presenter-container .bespoke-marp-presenter-note-container button:hover{opacity:1}body[data-bespoke-view=""] .bespoke-marp-parent>.bespoke-marp-osc>button:hover:active,body[data-bespoke-view=next] .bespoke-marp-parent>.bespoke-marp-osc>button:hover:active,body[data-bespoke-view=presenter] .bespoke-marp-presenter-container .bespoke-marp-presenter-info-container button:hover:active,body[data-bespoke-view=presenter] .bespoke-marp-presenter-container .bespoke-marp-presenter-note-container button:hover:active{opacity:.6}body[data-bespoke-view=""] .bespoke-marp-parent>.bespoke-marp-osc>button:hover:not(:disabled),body[data-bespoke-view=next] .bespoke-marp-parent>.bespoke-marp-osc>button:hover:not(:disabled),body[data-bespoke-view=presenter] .bespoke-marp-presenter-container .bespoke-marp-presenter-info-container button:hover:not(:disabled),body[data-bespoke-view=presenter] .bespoke-marp-presenter-container .bespoke-marp-presenter-note-container button:hover:not(:disabled){transition:none}body[data-bespoke-view=""] .bespoke-marp-parent>.bespoke-marp-osc>button[data-bespoke-marp-osc=prev],body[data-bespoke-view=next] .bespoke-marp-parent>.bespoke-marp-osc>button[data-bespoke-marp-osc=prev],body[data-bespoke-view=presenter] .bespoke-marp-presenter-container .bespoke-marp-presenter-info-container button.bespoke-marp-presenter-info-page-prev{background:#0000 url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48cGF0aCBmaWxsPSJub25lIiBzdHJva2U9IiNmZmYiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIgc3Ryb2tlLXdpZHRoPSI1IiBkPSJNNjggOTAgMjggNTBsNDAtNDAiLz48L3N2Zz4=") no-repeat 50%;background-size:contain;overflow:hidden;text-indent:100%;white-space:nowrap}body[data-bespoke-view=""] .bespoke-marp-parent>.bespoke-marp-osc>button[data-bespoke-marp-osc=next],body[data-bespoke-view=next] .bespoke-marp-parent>.bespoke-marp-osc>button[data-bespoke-marp-osc=next],body[data-bespoke-view=presenter] .bespoke-marp-presenter-container .bespoke-marp-presenter-info-container button.bespoke-marp-presenter-info-page-next{background:#0000 url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48cGF0aCBmaWxsPSJub25lIiBzdHJva2U9IiNmZmYiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIgc3Ryb2tlLXdpZHRoPSI1IiBkPSJtMzIgOTAgNDAtNDAtNDAtNDAiLz48L3N2Zz4=") no-repeat 50%;background-size:contain;overflow:hidden;text-indent:100%;white-space:nowrap}body[data-bespoke-view=""] .bespoke-marp-parent>.bespoke-marp-osc>button[data-bespoke-marp-osc=fullscreen],body[data-bespoke-view=next] .bespoke-marp-parent>.bespoke-marp-osc>button[data-bespoke-marp-osc=fullscreen]{background:#0000 url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48ZGVmcz48c3R5bGU+LmF7ZmlsbDpub25lO3N0cm9rZTojZmZmO3N0cm9rZS1saW5lY2FwOnJvdW5kO3N0cm9rZS1saW5lam9pbjpyb3VuZDtzdHJva2Utd2lkdGg6NXB4fTwvc3R5bGU+PC9kZWZzPjxyZWN0IHdpZHRoPSI4MCIgaGVpZ2h0PSI2MCIgeD0iMTAiIHk9IjIwIiBjbGFzcz0iYSIgcng9IjUuNjciLz48cGF0aCBkPSJNNDAgNzBIMjBWNTBtMjAgMEwyMCA3MG00MC00MGgyMHYyMG0tMjAgMCAyMC0yMCIgY2xhc3M9ImEiLz48L3N2Zz4=") no-repeat 50%;background-size:contain;overflow:hidden;text-indent:100%;white-space:nowrap}body[data-bespoke-view=""] .bespoke-marp-parent>.bespoke-marp-osc>button.exit[data-bespoke-marp-osc=fullscreen],body[data-bespoke-view=next] .bespoke-marp-parent>.bespoke-marp-osc>button.exit[data-bespoke-marp-osc=fullscreen]{background-image:url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48ZGVmcz48c3R5bGU+LmF7ZmlsbDpub25lO3N0cm9rZTojZmZmO3N0cm9rZS1saW5lY2FwOnJvdW5kO3N0cm9rZS1saW5lam9pbjpyb3VuZDtzdHJva2Utd2lkdGg6NXB4fTwvc3R5bGU+PC9kZWZzPjxyZWN0IHdpZHRoPSI4MCIgaGVpZ2h0PSI2MCIgeD0iMTAiIHk9IjIwIiBjbGFzcz0iYSIgcng9IjUuNjciLz48cGF0aCBkPSJNMjAgNTBoMjB2MjBtLTIwIDAgMjAtMjBtNDAgMEg2MFYzMG0yMCAwTDYwIDUwIiBjbGFzcz0iYSIvPjwvc3ZnPg==")}body[data-bespoke-view=""] .bespoke-marp-parent>.bespoke-marp-osc>button[data-bespoke-marp-osc=presenter],body[data-bespoke-view=next] .bespoke-marp-parent>.bespoke-marp-osc>button[data-bespoke-marp-osc=presenter]{background:#0000 url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48cGF0aCBmaWxsPSJub25lIiBzdHJva2U9IiNmZmYiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIgc3Ryb2tlLXdpZHRoPSI1IiBkPSJNODcuOCA0Ny41Qzg5IDUwIDg3LjcgNTIgODUgNTJIMzVhOC43IDguNyAwIDAgMS03LjItNC41bC0xNS42LTMxQzExIDE0IDEyLjIgMTIgMTUgMTJoNTBhOC44IDguOCAwIDAgMSA3LjIgNC41ek02MCA1MnYzNm0tMTAgMGgyME00NSA0MmgyMCIvPjwvc3ZnPg==") no-repeat 50%;background-size:contain;overflow:hidden;text-indent:100%;white-space:nowrap}body[data-bespoke-view=presenter] .bespoke-marp-presenter-container .bespoke-marp-presenter-note-container button.bespoke-marp-presenter-note-bigger{background:#0000 url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48cGF0aCBzdHJva2U9IiNmZmYiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIgc3Ryb2tlLXdpZHRoPSI1IiBkPSJNMTIgNTBoODBNNTIgOTBWMTAiLz48L3N2Zz4=") no-repeat 50%;background-size:contain;overflow:hidden;text-indent:100%;white-space:nowrap}body[data-bespoke-view=presenter] .bespoke-marp-presenter-container .bespoke-marp-presenter-note-container button.bespoke-marp-presenter-note-smaller{background:#0000 url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48cGF0aCBmaWxsPSJub25lIiBzdHJva2U9IiNmZmYiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIgc3Ryb2tlLXdpZHRoPSI1IiBkPSJNMTIgNTBoODAiLz48L3N2Zz4=") no-repeat 50%;background-size:contain;overflow:hidden;text-indent:100%;white-space:nowrap}}@keyframes __bespoke_marp_transition_reduced_outgoing__{0%{opacity:1}to{opacity:0}}@keyframes __bespoke_marp_transition_reduced_incoming__{0%{mix-blend-mode:plus-lighter;opacity:0}to{mix-blend-mode:plus-lighter;opacity:1}}.bespoke-marp-note,.bespoke-marp-osc,.bespoke-progress-parent{display:none;transition:none}@media screen{::view-transition-group(*){animation-duration:var(--marp-bespoke-transition-animation-duration,.5s);animation-timing-function:ease}::view-transition-new(*),::view-transition-old(*){animation-delay:0s;animation-direction:var(--marp-bespoke-transition-animation-direction,normal);animation-duration:var(--marp-bespoke-transition-animation-duration,.5s);animation-fill-mode:both;animation-name:var(--marp-bespoke-transition-animation-name,var(--marp-bespoke-transition-animation-name-fallback,__bespoke_marp_transition_no_animation__));mix-blend-mode:normal}::view-transition-old(*){--marp-bespoke-transition-animation-name-fallback:__bespoke_marp_transition_reduced_outgoing__;animation-timing-function:ease}::view-transition-new(*){--marp-bespoke-transition-animation-name-fallback:__bespoke_marp_transition_reduced_incoming__;animation-timing-function:ease}::view-transition-new(root),::view-transition-old(root){animation-timing-function:linear}::view-transition-new(__bespoke_marp_transition_osc__),::view-transition-old(__bespoke_marp_transition_osc__){animation-duration:0s!important;animation-name:__bespoke_marp_transition_osc__!important}::view-transition-new(__bespoke_marp_transition_osc__){opacity:0!important}.bespoke-marp-transition-warming-up::view-transition-group(*),.bespoke-marp-transition-warming-up::view-transition-new(*),.bespoke-marp-transition-warming-up::view-transition-old(*){animation-play-state:paused!important}body,html{height:100%;margin:0}body{background:#000;overflow:hidden}svg.bespoke-marp-slide{content-visibility:hidden;opacity:0;pointer-events:none;z-index:-1}svg.bespoke-marp-slide:not(.bespoke-marp-active) *{view-transition-name:none!important}svg.bespoke-marp-slide.bespoke-marp-active{content-visibility:visible;opacity:1;pointer-events:auto;z-index:0}svg.bespoke-marp-slide.bespoke-marp-active.bespoke-marp-active-ready *{animation-name:__bespoke_marp__!important}@supports not (content-visibility:hidden){svg.bespoke-marp-slide[data-bespoke-marp-load=hideable]{display:none}svg.bespoke-marp-slide[data-bespoke-marp-load=hideable].bespoke-marp-active{display:block}}}@media screen and (prefers-reduced-motion:reduce){svg.bespoke-marp-slide *{view-transition-name:none!important}}@media screen{[data-bespoke-marp-fragment=inactive]{visibility:hidden}body[data-bespoke-view=""] .bespoke-marp-parent,body[data-bespoke-view=next] .bespoke-marp-parent{inset:0;position:absolute}body[data-bespoke-view=""] .bespoke-marp-parent>.bespoke-marp-osc,body[data-bespoke-view=next] .bespoke-marp-parent>.bespoke-marp-osc{background:#000000a6;border-radius:7px;bottom:50px;color:#fff;contain:paint;display:block;font-family:Helvetica,Arial,sans-serif;font-size:16px;left:50%;line-height:0;opacity:1;padding:12px;position:absolute;touch-action:manipulation;transform:translateX(-50%);transition:opacity .2s linear;-webkit-user-select:none;user-select:none;white-space:nowrap;will-change:transform;z-index:1;view-transition-name:__bespoke_marp_transition_osc__}body[data-bespoke-view=""] .bespoke-marp-parent>.bespoke-marp-osc>*,body[data-bespoke-view=next] .bespoke-marp-parent>.bespoke-marp-osc>*{margin-left:6px}body[data-bespoke-view=""] .bespoke-marp-parent>.bespoke-marp-osc>:first-child,body[data-bespoke-view=next] .bespoke-marp-parent>.bespoke-marp-osc>:first-child{margin-left:0}body[data-bespoke-view=""] .bespoke-marp-parent>.bespoke-marp-osc>span,body[data-bespoke-view=next] .bespoke-marp-parent>.bespoke-marp-osc>span{opacity:.8}body[data-bespoke-view=""] .bespoke-marp-parent>.bespoke-marp-osc>span[data-bespoke-marp-osc=page],body[data-bespoke-view=next] .bespoke-marp-parent>.bespoke-marp-osc>span[data-bespoke-marp-osc=page]{display:inline-block;min-width:140px;text-align:center}body[data-bespoke-view=""] .bespoke-marp-parent>.bespoke-marp-osc>button[data-bespoke-marp-osc=fullscreen],body[data-bespoke-view=""] .bespoke-marp-parent>.bespoke-marp-osc>button[data-bespoke-marp-osc=next],body[data-bespoke-view=""] .bespoke-marp-parent>.bespoke-marp-osc>button[data-bespoke-marp-osc=presenter],body[data-bespoke-view=""] .bespoke-marp-parent>.bespoke-marp-osc>button[data-bespoke-marp-osc=prev],body[data-bespoke-view=next] .bespoke-marp-parent>.bespoke-marp-osc>button[data-bespoke-marp-osc=fullscreen],body[data-bespoke-view=next] .bespoke-marp-parent>.bespoke-marp-osc>button[data-bespoke-marp-osc=next],body[data-bespoke-view=next] .bespoke-marp-parent>.bespoke-marp-osc>button[data-bespoke-marp-osc=presenter],body[data-bespoke-view=next] .bespoke-marp-parent>.bespoke-marp-osc>button[data-bespoke-marp-osc=prev]{height:32px;line-height:32px;width:32px}body[data-bespoke-view=""] .bespoke-marp-parent.bespoke-marp-inactive,body[data-bespoke-view=next] .bespoke-marp-parent.bespoke-marp-inactive{cursor:none}body[data-bespoke-view=""] .bespoke-marp-parent.bespoke-marp-inactive>.bespoke-marp-osc,body[data-bespoke-view=next] .bespoke-marp-parent.bespoke-marp-inactive>.bespoke-marp-osc{opacity:0;pointer-events:none}body[data-bespoke-view=""] svg.bespoke-marp-slide,body[data-bespoke-view=next] svg.bespoke-marp-slide{height:100%;left:0;position:absolute;top:0;width:100%}body[data-bespoke-view=""] .bespoke-progress-parent{background:#222;display:flex;height:5px;width:100%}body[data-bespoke-view=""] .bespoke-progress-parent+.bespoke-marp-parent{top:5px}body[data-bespoke-view=""] .bespoke-progress-parent .bespoke-progress-bar{background:#0288d1;flex:0 0 0;transition:flex-basis .2s cubic-bezier(0,1,1,1)}body[data-bespoke-view=next]{background:#0000}body[data-bespoke-view=presenter]{background:#161616}body[data-bespoke-view=presenter] .bespoke-marp-presenter-container{display:grid;font-family:Helvetica,Arial,sans-serif;grid-template:"current dragbar next" minmax(140px,1fr) "current dragbar note" 2fr "info    dragbar note" 3em;grid-template-columns:minmax(3px,var(--bespoke-marp-presenter-split-ratio,66%)) 0 minmax(3px,1fr);height:100%;left:0;position:absolute;top:0;width:100%}body[data-bespoke-view=presenter] .bespoke-marp-presenter-container .bespoke-marp-parent{grid-area:current;overflow:hidden;position:relative}body[data-bespoke-view=presenter] .bespoke-marp-presenter-container .bespoke-marp-parent svg.bespoke-marp-slide{height:calc(100% - 40px);left:20px;pointer-events:none;position:absolute;top:20px;-webkit-user-select:none;user-select:none;width:calc(100% - 40px)}body[data-bespoke-view=presenter] .bespoke-marp-presenter-container .bespoke-marp-parent svg.bespoke-marp-slide.bespoke-marp-active{filter:drop-shadow(0 3px 10px rgba(0,0,0,.5))}body[data-bespoke-view=presenter] .bespoke-marp-presenter-container .bespoke-marp-presenter-dragbar-container{background:#0288d1;cursor:col-resize;grid-area:dragbar;margin-left:-3px;opacity:0;position:relative;transition:opacity .4s linear .1s;width:6px;z-index:10}body[data-bespoke-view=presenter] .bespoke-marp-presenter-container .bespoke-marp-presenter-dragbar-container:hover{opacity:1}body[data-bespoke-view=presenter] .bespoke-marp-presenter-container .bespoke-marp-presenter-dragbar-container.active{opacity:1;transition-delay:0s}body[data-bespoke-view=presenter] .bespoke-marp-presenter-container .bespoke-marp-presenter-next-container{background:#222;cursor:pointer;display:none;grid-area:next;overflow:hidden;position:relative}body[data-bespoke-view=presenter] .bespoke-marp-presenter-container .bespoke-marp-presenter-next-container.active{display:block}body[data-bespoke-view=presenter] .bespoke-marp-presenter-container .bespoke-marp-presenter-next-container iframe.bespoke-marp-presenter-next{background:#0000;border:0;display:block;filter:drop-shadow(0 3px 10px rgba(0,0,0,.5));height:calc(100% - 40px);left:20px;pointer-events:none;position:absolute;top:20px;-webkit-user-select:none;user-select:none;width:calc(100% - 40px)}body[data-bespoke-view=presenter] .bespoke-marp-presenter-container .bespoke-marp-presenter-note-container{background:#222;color:#eee;grid-area:note;position:relative;z-index:1}body[data-bespoke-view=presenter] .bespoke-marp-presenter-container .bespoke-marp-presenter-note-container button{height:1.5em;line-height:1.5em;width:1.5em}body[data-bespoke-view=presenter] .bespoke-marp-presenter-container .bespoke-marp-presenter-note-container .bespoke-marp-presenter-note-wrapper{display:block;inset:0;position:absolute}body[data-bespoke-view=presenter] .bespoke-marp-presenter-container .bespoke-marp-presenter-note-container .bespoke-marp-presenter-note-buttons{background:#000000a6;border-radius:4px;bottom:0;display:flex;gap:4px;margin:12px;opacity:0;padding:6px;pointer-events:none;position:absolute;right:0;transition:opacity .2s linear}body[data-bespoke-view=presenter] .bespoke-marp-presenter-container .bespoke-marp-presenter-note-container .bespoke-marp-presenter-note-buttons:focus-within,body[data-bespoke-view=presenter] .bespoke-marp-presenter-container .bespoke-marp-presenter-note-container .bespoke-marp-presenter-note-wrapper:focus-within+.bespoke-marp-presenter-note-buttons,body[data-bespoke-view=presenter] .bespoke-marp-presenter-container .bespoke-marp-presenter-note-container:hover .bespoke-marp-presenter-note-buttons{opacity:1;pointer-events:auto}body[data-bespoke-view=presenter] .bespoke-marp-presenter-container .bespoke-marp-presenter-note-container .bespoke-marp-note{box-sizing:border-box;font-size:calc(1.1em*var(--bespoke-marp-note-font-scale, 1));height:calc(100% - 40px);margin:20px;overflow:auto;padding-right:3px;white-space:pre-wrap;width:calc(100% - 40px);word-wrap:break-word;scrollbar-color:#eeeeee80 #0000;scrollbar-width:thin}body[data-bespoke-view=presenter] .bespoke-marp-presenter-container .bespoke-marp-presenter-note-container .bespoke-marp-note::-webkit-scrollbar{width:6px}body[data-bespoke-view=presenter] .bespoke-marp-presenter-container .bespoke-marp-presenter-note-container .bespoke-marp-note::-webkit-scrollbar-track{background:#0000}body[data-bespoke-view=presenter] .bespoke-marp-presenter-container .bespoke-marp-presenter-note-container .bespoke-marp-note::-webkit-scrollbar-thumb{background:#eeeeee80;border-radius:6px}body[data-bespoke-view=presenter] .bespoke-marp-presenter-container .bespoke-marp-presenter-note-container .bespoke-marp-note:empty{pointer-events:none}body[data-bespoke-view=presenter] .bespoke-marp-presenter-container .bespoke-marp-presenter-note-container .bespoke-marp-note.active{display:block}body[data-bespoke-view=presenter] .bespoke-marp-presenter-container .bespoke-marp-presenter-note-container .bespoke-marp-note p:first-child{margin-top:0}body[data-bespoke-view=presenter] .bespoke-marp-presenter-container .bespoke-marp-presenter-note-container .bespoke-marp-note p:last-child{margin-bottom:0}body[data-bespoke-view=presenter] .bespoke-marp-presenter-container .bespoke-marp-presenter-info-container{align-items:center;box-sizing:border-box;color:#eee;display:flex;flex-wrap:nowrap;grid-area:info;justify-content:center;overflow:hidden;padding:0 10px}body[data-bespoke-view=presenter] .bespoke-marp-presenter-container .bespoke-marp-presenter-info-container .bespoke-marp-presenter-info-page,body[data-bespoke-view=presenter] .bespoke-marp-presenter-container .bespoke-marp-presenter-info-container .bespoke-marp-presenter-info-time,body[data-bespoke-view=presenter] .bespoke-marp-presenter-container .bespoke-marp-presenter-info-container .bespoke-marp-presenter-info-timer{box-sizing:border-box;display:block;padding:0 10px;white-space:nowrap;width:100%}body[data-bespoke-view=presenter] .bespoke-marp-presenter-container .bespoke-marp-presenter-info-container button{height:1.5em;line-height:1.5em;width:1.5em}body[data-bespoke-view=presenter] .bespoke-marp-presenter-container .bespoke-marp-presenter-info-container .bespoke-marp-presenter-info-page{order:2;text-align:center}body[data-bespoke-view=presenter] .bespoke-marp-presenter-container .bespoke-marp-presenter-info-container .bespoke-marp-presenter-info-page .bespoke-marp-presenter-info-page-text{display:inline-block;min-width:120px;text-align:center}body[data-bespoke-view=presenter] .bespoke-marp-presenter-container .bespoke-marp-presenter-info-container .bespoke-marp-presenter-info-time{color:#999;order:1;text-align:left}body[data-bespoke-view=presenter] .bespoke-marp-presenter-container .bespoke-marp-presenter-info-container .bespoke-marp-presenter-info-timer{color:#999;order:3;text-align:right}body[data-bespoke-view=presenter] .bespoke-marp-presenter-container .bespoke-marp-presenter-info-container .bespoke-marp-presenter-info-timer:hover{cursor:pointer}}@media print{.bespoke-marp-presenter-info-container,.bespoke-marp-presenter-next-container,.bespoke-marp-presenter-note-container{display:none}}</style><style>@import url('https://fonts.googleapis.com/css2?family=Archivo+Black&family=Noto+Sans+SC:wght@400;500;700;900&display=swap');div#\:\$p > svg > foreignObject > section{width:1280px;height:720px;box-sizing:border-box;overflow:hidden;position:relative;scroll-snap-align:center center;-webkit-text-size-adjust:100%;text-size-adjust:100%}div#\:\$p > svg > foreignObject > section::after{bottom:0;content:attr(data-marpit-pagination);padding:inherit;pointer-events:none;position:absolute;right:0}div#\:\$p > svg > foreignObject > section:not([data-marpit-pagination])::after{display:none}div#\:\$p > svg > foreignObject > section :is(h1, marp-h1){font-size:2em;margin-block:0.67em}div#\:\$p > svg > foreignObject > section video::-webkit-media-controls{will-change:transform}@page {size:1280px 720px;margin:0}@media print{html, body{background-color:#fff;margin:0;page-break-inside:avoid;break-inside:avoid-page}div#\:\$p > svg > foreignObject > section{page-break-before:always;break-before:page}div#\:\$p > svg > foreignObject > section, div#\:\$p > svg > foreignObject > section *{-webkit-print-color-adjust:exact!important;animation-delay:0s!important;animation-duration:0s!important;color-adjust:exact!important;print-color-adjust:exact!important;transition:none!important}div#\:\$p > svg[data-marpit-svg]{display:block;height:100vh;width:100vw}}div#\:\$p > svg > foreignObject > :where(section){container-type:size}div#\:\$p > svg > foreignObject > section img[data-marp-twemoji]{background:transparent;height:1em;margin:0 .05em 0 .1em;vertical-align:-.1em;width:1em}div#\:\$p > svg > foreignObject > :where(section):not([\20 root]){--yellow: #f7d447;--yellow-soft: #f9dd74;--ink: #111111;--gray: #a3a3a3;--grid: #e3d5a8;--sans: 'Noto Sans SC', 'PingFang SC', 'Hiragino Sans', 'Microsoft YaHei', sans-serif;--display: 'Archivo Black', 'Arial Black', 'Noto Sans SC', sans-serif;--mono: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;}div#\:\$p > svg > foreignObject > section{width:1280px;height:720px;box-sizing:border-box;position:relative;padding:64px 84px 70px;background:#ffffff;color:var(--ink);font-family:var(--sans);font-size:27px;font-weight:500;line-height:1.6}div#\:\$p > svg > foreignObject > section{--marpit-root-font-size: 27px;}div#\:\$p > svg > foreignObject > section::before{content:'';position:absolute;top:30px;bottom:30px;left:60px;right:60px;border-left:2px dashed var(--grid);border-right:2px dashed var(--grid);pointer-events:none}div#\:\$p > svg > foreignObject > section::after{content:attr(data-marpit-pagination) ' / ' attr(data-marpit-pagination-total);position:absolute;right:76px;bottom:32px;padding:2px 12px;border-radius:6px;background:rgba(255, 255, 255, 0.82);backdrop-filter:blur(2px);font-family:var(--mono);font-size:15px;font-weight:700;letter-spacing:0.08em;color:#c9b96c;z-index:10}div#\:\$p > svg > foreignObject > section::after{--marpit-root-font-size: 15px;}div#\:\$p > svg > foreignObject > section :is(h1, marp-h1){margin:0.4em 0 0.2em;font-size:1.5em}div#\:\$p > svg > foreignObject > section p{margin:0.6em 0}div#\:\$p > svg > foreignObject > section ol{margin:10px 0;padding-left:2em}div#\:\$p > svg > foreignObject > section blockquote{margin:10px 0;padding:4px 16px;border-left:6px solid var(--yellow);color:var(--gray)}div#\:\$p > svg > foreignObject > section strong{font-weight:800;color:var(--ink)}div#\:\$p > svg > foreignObject > section em{font-style:normal;color:var(--gray);font-size:0.82em;font-weight:500}div#\:\$p > svg > foreignObject > section code{font-family:var(--mono);font-size:0.8em;font-weight:700;color:#7a7a7a;background:#f6f1de;padding:1px 8px;border-radius:3px}div#\:\$p > svg > foreignObject > section :is(h2, marp-h2){position:relative;margin:0 0 10px;padding:0 120px 14px 0;border-bottom:2px dashed var(--grid);color:var(--yellow);font-weight:900;font-size:44px;line-height:1.25}div#\:\$p > svg > foreignObject > section :is(h2, marp-h2)::after{content:'</>';position:absolute;right:2px;top:2px;color:var(--ink);font-family:var(--mono);font-size:30px;font-weight:700;letter-spacing:-0.05em}div#\:\$p > svg > foreignObject > section :is(h3, marp-h3){display:inline-block;margin:24px 0 8px;padding:2px 16px 4px;background:var(--yellow);color:var(--ink);font-weight:900;font-size:24px;letter-spacing:0.05em;line-height:1.4}div#\:\$p > svg > foreignObject > section :is(h2, marp-h2) + :is(h3, marp-h3){margin-top:26px}div#\:\$p > svg > foreignObject > section ul{list-style:none;margin:10px 0;padding:0}div#\:\$p > svg > foreignObject > section ul li{position:relative;padding-left:30px;margin:12px 0}div#\:\$p > svg > foreignObject > section ul li::before{content:'';position:absolute;left:2px;top:0.56em;width:13px;height:13px;background:var(--yellow)}div#\:\$p > svg > foreignObject > section ul ul{margin:4px 0 2px}div#\:\$p > svg > foreignObject > section ul ul li{margin:6px 0}div#\:\$p > svg > foreignObject > section ul ul li::before{top:0.6em;width:9px;height:9px;background:var(--yellow-soft)}div#\:\$p > svg > foreignObject > section table{border-collapse:collapse;width:100%;margin:16px 0 8px;font-size:26px}div#\:\$p > svg > foreignObject > section th{background:var(--yellow);color:var(--ink);font-weight:900;border:2.5px solid var(--ink);padding:9px 16px;text-align:left}div#\:\$p > svg > foreignObject > section td{border:2.5px solid var(--ink);padding:8px 16px;background:#ffffff}div#\:\$p > svg > foreignObject > section tr:nth-child(even) td{background:#fdf6dd}div#\:\$p > svg > foreignObject > section img{vertical-align:middle}div#\:\$p > svg > foreignObject > section p > img:only-child{display:block;margin:14px auto 4px}div#\:\$p > svg > foreignObject > section div.columns{display:flex;gap:48px;align-items:center;margin:16px 0}div#\:\$p > svg > foreignObject > section div.columns > div.column{flex:1;min-width:0}div#\:\$p > svg > foreignObject > section div.columns > div.column > :first-child{margin-top:0}div#\:\$p > svg > foreignObject > section.roster table{font-size:22px;table-layout:fixed}div#\:\$p > svg > foreignObject > section.roster th:first-child, div#\:\$p > svg > foreignObject > section.roster td:first-child{width:350px}div#\:\$p > svg > foreignObject > section.roster th{padding:7px 14px}div#\:\$p > svg > foreignObject > section.roster td{padding:7px 14px}div#\:\$p > svg > foreignObject > section.side{display:flex;flex-direction:column;padding-bottom:200px}div#\:\$p > svg > foreignObject > section.side :is(h2, marp-h2){max-width:500px}div#\:\$p > svg > foreignObject > section.side :is(h3, marp-h3), div#\:\$p > svg > foreignObject > section.side p{max-width:600px}div#\:\$p > svg > foreignObject > section.side img{position:absolute;top:0;right:0;max-height:100%;max-width:45%;margin:0}div#\:\$p > svg > foreignObject > section.side p > img:only-child{margin:0}div#\:\$p > svg > foreignObject > section.side :is(h2, marp-h2){font-size:36px}div#\:\$p > svg > foreignObject > section.side :is(h3, marp-h3){font-size:33px;margin-top:auto}div#\:\$p > svg > foreignObject > section.side :is(h3, marp-h3) + p{font-size:29px;margin:10px 0 0}div#\:\$p > svg > foreignObject > section.side :is(h4, marp-h4){position:absolute;left:84px;bottom:44px;margin:0;font-family:var(--display);font-weight:400;font-size:92px;line-height:1;color:transparent;-webkit-text-stroke:3px var(--yellow);pointer-events:none}div#\:\$p > svg > foreignObject > section.todo{display:flex;flex-direction:column}div#\:\$p > svg > foreignObject > section.todo :is(h3, marp-h3){margin-top:auto}div#\:\$p > svg > foreignObject > section.lead{padding-top:268px}div#\:\$p > svg > foreignObject > section.lead::before{content:'';position:absolute;top:0;left:0;right:0;height:196px;background:var(--yellow);border:none}div#\:\$p > svg > foreignObject > section.lead :is(h2, marp-h2){position:absolute;top:142px;left:84px;right:84px;margin:0;padding:0;border:none;color:var(--ink);font-weight:700;font-size:23px}div#\:\$p > svg > foreignObject > section.lead :is(h2, marp-h2)::after{content:'Computer Psycho Union\A University of Nottingham Ningbo China';position:absolute;top:-74px;right:0;white-space:pre;text-align:right;color:var(--ink);font-weight:900;font-size:19px;line-height:1.5}div#\:\$p > svg > foreignObject > section.lead :is(h1, marp-h1){position:absolute;top:32px;left:84px;right:470px;margin:0;color:var(--ink);font-weight:900;font-size:48px;line-height:1.22}div#\:\$p > svg > foreignObject > section.lead p{margin:0 0 12px;font-weight:700;font-size:27px}div#\:\$p > svg > foreignObject > section.lead p + p{margin-top:2px;font-weight:500;font-size:20px;color:var(--gray)}div#\:\$p > svg > foreignObject > section.lead :is(h3, marp-h3), div#\:\$p > svg > foreignObject > section.lead :is(h4, marp-h4){position:absolute;right:84px;display:block;margin:0;padding:0;background:none;font-family:var(--display);font-weight:400;line-height:0.96;pointer-events:none}div#\:\$p > svg > foreignObject > section.lead :is(h3, marp-h3){bottom:150px;font-size:100px;color:transparent;-webkit-text-stroke:3.5px var(--yellow)}div#\:\$p > svg > foreignObject > section.lead :is(h4, marp-h4){bottom:46px;font-size:80px;color:var(--yellow)}div#\:\$p > svg > foreignObject > section.agenda ol{list-style:none;counter-reset:item;margin:34px 0 0;padding:0}div#\:\$p > svg > foreignObject > section.agenda ol li{counter-increment:item;position:relative;display:block;padding:20px 16px 20px 138px;margin:0;border-bottom:2px dashed var(--grid);font-weight:900;font-size:35px;line-height:1.35}div#\:\$p > svg > foreignObject > section.agenda ol li::before{content:'0' counter(item);position:absolute;left:6px;top:50%;transform:translateY(-50%);font-family:var(--display);font-weight:400;font-size:58px;line-height:1;color:var(--yellow-soft)}div#\:\$p > svg > foreignObject > section.agenda ol li:first-child{background:var(--yellow)}div#\:\$p > svg > foreignObject > section.agenda ol li:first-child::before{color:#ffffff}div#\:\$p > svg > foreignObject > section.agenda ol li:first-child em{color:rgba(17, 17, 17, 0.72)}div#\:\$p > svg > foreignObject > section.activities{font-size:28px}div#\:\$p > svg > foreignObject > section.activities{--marpit-root-font-size: 28px;}div#\:\$p > svg > foreignObject > section.activities :is(h3, marp-h3){margin:16px 0 6px;font-size:28px}div#\:\$p > svg > foreignObject > section.activities ul{margin:4px 0}div#\:\$p > svg > foreignObject > section.activities ul li{margin:8px 0}div#\:\$p > svg > foreignObject > section.yellow{background:var(--yellow)}div#\:\$p > svg > foreignObject > section.yellow::before{border-color:rgba(255, 255, 255, 0.55)}div#\:\$p > svg > foreignObject > section.yellow::after{content:attr(data-marpit-pagination) ' / ' attr(data-marpit-pagination-total);color:rgba(17, 17, 17, 0.6)}div#\:\$p > svg > foreignObject > section.lead::after{content:attr(data-marpit-pagination) ' / ' attr(data-marpit-pagination-total);color:transparent}div#\:\$p > svg > foreignObject > section.yellow :is(h2, marp-h2){position:absolute;top:46px;right:84px;left:auto;margin:0;padding:0;border:none;color:transparent;font-family:var(--display);font-weight:400;font-size:96px;line-height:1;-webkit-text-stroke:3px #ffffff}div#\:\$p > svg > foreignObject > section.yellow :is(h2, marp-h2)::after{content:none}div#\:\$p > svg > foreignObject > section.yellow :is(h3, marp-h3){position:absolute;top:172px;left:84px;display:block;margin:0;padding:0;background:none;color:#ffffff;font-family:var(--display);font-weight:400;font-size:96px;line-height:1}div#\:\$p > svg > foreignObject > section.yellow :is(h4, marp-h4){position:absolute;top:352px;left:84px;display:block;margin:0;padding:0;background:none;color:var(--ink);font-weight:900;font-size:88px;line-height:1.15}div#\:\$p > svg > foreignObject > section.yellow p{position:absolute;left:84px;bottom:84px;margin:0;color:var(--ink);font-weight:700;font-size:24px}div#\:\$p > svg > foreignObject > section :is(pre, marp-pre), div#\:\$p > svg > foreignObject > section div.mermaid{position:relative;margin:16px 0 14px;padding:58px 26px 22px;border:2.5px solid var(--ink);border-radius:12px;background:#fdfaf0;box-shadow:7px 7px 0 var(--yellow);font-size:24px;line-height:1.55;overflow:hidden}div#\:\$p > svg > foreignObject > section :is(pre, marp-pre)::before, div#\:\$p > svg > foreignObject > section div.mermaid::before{content:'';position:absolute;inset:0 0 auto 0;height:40px;border-bottom:2px solid var(--ink);border-radius:9.5px 9.5px 0 0;background-color:#f4ecd7;background-image:radial-gradient(circle at 26px 20px, #ff5f57 0 6px, transparent 6.5px), radial-gradient(circle at 48px 20px, #febc2e 0 6px, transparent 6.5px), radial-gradient(circle at 70px 20px, #28c840 0 6px, transparent 6.5px)}div#\:\$p > svg > foreignObject > section div.mermaid{text-align:center}div#\:\$p > svg > foreignObject > section div.mermaid svg{max-width:100%;height:auto}div#\:\$p > svg > foreignObject > section :is(pre, marp-pre) code{display:block;padding:0;background:none;border:none;border-radius:0;color:var(--ink);font-family:var(--mono);font-size:1em;font-weight:500;line-height:inherit;white-space:pre-wrap;overflow-wrap:break-word;tab-size:2}div#\:\$p > svg > foreignObject > section :is(pre, marp-pre) code .hljs-comment, div#\:\$p > svg > foreignObject > section :is(pre, marp-pre) code .hljs-quote{color:#a39a7a;font-style:italic}div#\:\$p > svg > foreignObject > section :is(pre, marp-pre) code .hljs-keyword, div#\:\$p > svg > foreignObject > section :is(pre, marp-pre) code .hljs-selector-tag, div#\:\$p > svg > foreignObject > section :is(pre, marp-pre) code .hljs-literal, div#\:\$p > svg > foreignObject > section :is(pre, marp-pre) code .hljs-type{color:#b8860b;font-weight:700}div#\:\$p > svg > foreignObject > section :is(pre, marp-pre) code .hljs-string, div#\:\$p > svg > foreignObject > section :is(pre, marp-pre) code .hljs-regexp, div#\:\$p > svg > foreignObject > section :is(pre, marp-pre) code .hljs-addition, div#\:\$p > svg > foreignObject > section :is(pre, marp-pre) code .hljs-attribute, div#\:\$p > svg > foreignObject > section :is(pre, marp-pre) code .hljs-meta .hljs-string{color:#2e7d32}div#\:\$p > svg > foreignObject > section :is(pre, marp-pre) code .hljs-number, div#\:\$p > svg > foreignObject > section :is(pre, marp-pre) code .hljs-built_in, div#\:\$p > svg > foreignObject > section :is(pre, marp-pre) code .hljs-symbol, div#\:\$p > svg > foreignObject > section :is(pre, marp-pre) code .hljs-bullet{color:#c2185b}div#\:\$p > svg > foreignObject > section :is(pre, marp-pre) code .hljs-title, div#\:\$p > svg > foreignObject > section :is(pre, marp-pre) code .hljs-section, div#\:\$p > svg > foreignObject > section :is(pre, marp-pre) code .hljs-name, div#\:\$p > svg > foreignObject > section :is(pre, marp-pre) code .hljs-selector-id, div#\:\$p > svg > foreignObject > section :is(pre, marp-pre) code .hljs-selector-class{color:#1565c0;font-weight:700}div#\:\$p > svg > foreignObject > section :is(pre, marp-pre) code .hljs-variable, div#\:\$p > svg > foreignObject > section :is(pre, marp-pre) code .hljs-template-variable, div#\:\$p > svg > foreignObject > section :is(pre, marp-pre) code .hljs-params, div#\:\$p > svg > foreignObject > section :is(pre, marp-pre) code .hljs-attr{color:#5d4037}div#\:\$p > svg > foreignObject > section :is(pre, marp-pre) code .hljs-deletion{color:#c62828;background:#fdecea}div#\:\$p > svg > foreignObject > section :is(pre, marp-pre) code .hljs-emphasis{font-style:italic}div#\:\$p > svg > foreignObject > section :is(pre, marp-pre) code .hljs-strong{font-weight:700}div#\:\$p > svg > foreignObject > section.side img{top:50%;transform:translateY(-50%);max-width:none;max-height:none}div#\:\$p > svg > foreignObject > section[data-marpit-scope-Y4dxTH6Z].side{padding-left:610px}div#\:\$p > svg > foreignObject > section[data-marpit-scope-Y4dxTH6Z].side img{right:auto;left:0}div#\:\$p > svg > foreignObject > section[data-marpit-advanced-background="background"]{columns:initial!important;display:block!important;padding:0!important}div#\:\$p > svg > foreignObject > section[data-marpit-advanced-background="background"]::before, div#\:\$p > svg > foreignObject > section[data-marpit-advanced-background="background"]::after, div#\:\$p > svg > foreignObject > section[data-marpit-advanced-background="content"]::before, div#\:\$p > svg > foreignObject > section[data-marpit-advanced-background="content"]::after{display:none!important}div#\:\$p > svg > foreignObject > section[data-marpit-advanced-background="background"] > div[data-marpit-advanced-background-container]{all:initial;display:flex;flex-direction:row;height:100%;overflow:hidden;width:100%}div#\:\$p > svg > foreignObject > section[data-marpit-advanced-background="background"] > div[data-marpit-advanced-background-container][data-marpit-advanced-background-direction="vertical"]{flex-direction:column}div#\:\$p > svg > foreignObject > section[data-marpit-advanced-background="background"][data-marpit-advanced-background-split] > div[data-marpit-advanced-background-container]{width:var(--marpit-advanced-background-split, 50%)}div#\:\$p > svg > foreignObject > section[data-marpit-advanced-background="background"][data-marpit-advanced-background-split="right"] > div[data-marpit-advanced-background-container]{margin-left:calc(100% - var(--marpit-advanced-background-split, 50%))}div#\:\$p > svg > foreignObject > section[data-marpit-advanced-background="background"] > div[data-marpit-advanced-background-container] > figure{all:initial;background-position:center;background-repeat:no-repeat;background-size:cover;flex:auto;margin:0}div#\:\$p > svg > foreignObject > section[data-marpit-advanced-background="background"] > div[data-marpit-advanced-background-container] > figure > figcaption{position:absolute;border:0;clip:rect(0, 0, 0, 0);height:1px;margin:-1px;overflow:hidden;padding:0;white-space:nowrap;width:1px}div#\:\$p > svg > foreignObject > section[data-marpit-advanced-background="content"], div#\:\$p > svg > foreignObject > section[data-marpit-advanced-background="pseudo"]{background:transparent!important}div#\:\$p > svg > foreignObject > section[data-marpit-advanced-background="pseudo"], div#\:\$p > svg[data-marpit-svg] > foreignObject[data-marpit-advanced-background="pseudo"]{pointer-events:none!important}div#\:\$p > svg > foreignObject > section[data-marpit-advanced-background-split]{width:100%;height:100%}
+</style></head><body><div class="bespoke-marp-osc"><button data-bespoke-marp-osc="prev" tabindex="-1" title="Previous slide">Previous slide</button><span data-bespoke-marp-osc="page"></span><button data-bespoke-marp-osc="next" tabindex="-1" title="Next slide">Next slide</button><button data-bespoke-marp-osc="fullscreen" tabindex="-1" title="Toggle fullscreen (f)">Toggle fullscreen</button><button data-bespoke-marp-osc="presenter" tabindex="-1" title="Open presenter view (p)">Open presenter view</button></div><div id=":$p"><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="1" data-paginate="true" data-class="lead" data-theme="cpu" lang="C" class="lead" data-marpit-pagination="1" style="--paginate:true;--class:lead;--theme:cpu;" data-marpit-pagination-total="39"><script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+<script>
+mermaid.initialize({
+  startOnLoad: false,
+  theme: 'base',
+  themeVariables: {
+    fontFamily: "'Noto Sans SC','PingFang SC','Hiragino Sans',sans-serif",
+    fontSize: '24px',
+    primaryColor: '#fdfaf0',
+    primaryBorderColor: '#111111',
+    primaryTextColor: '#111111',
+    secondaryColor: '#f9dd74',
+    secondaryBorderColor: '#111111',
+    secondaryTextColor: '#111111',
+    tertiaryColor: '#fdf6dd',
+    tertiaryBorderColor: '#e3d5a8',
+    tertiaryTextColor: '#111111',
+    lineColor: '#111111',
+    textColor: '#111111',
+    edgeLabelBackground: '#f9dd74',
+    clusterBkg: '#fdf6dd',
+    clusterBorder: '#e3d5a8',
+    actorBkg: '#fdfaf0',
+    actorBorder: '#111111',
+    actorTextColor: '#111111',
+    actorLineColor: '#a3a3a3',
+    signalColor: '#111111',
+    signalTextColor: '#111111',
+    noteBkgColor: '#f9dd74',
+    noteBorderColor: '#111111',
+    activationBkgColor: '#f9dd74',
+    activationBorderColor: '#111111',
+    sequenceNumberColor: '#111111',
+    taskBkgColor: '#f9dd74',
+    taskBorderColor: '#111111',
+    taskTextColor: '#111111',
+    todayLineColor: '#111111',
+    gridColor: '#a3a3a3'
+  }
+});
+const renderMermaid = () => {
+  document.querySelectorAll('pre.mermaid, pre > code.language-mermaid').forEach((el) => {
+    const pre = el.tagName === 'PRE' ? el : el.parentElement;
+    const container = document.createElement('div');
+    container.className = 'mermaid';
+    container.textContent = pre.textContent.trim();
+    pre.replaceWith(container);
+  });
+  mermaid.run();
+};
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', renderMermaid);
+} else {
+  renderMermaid();
+}
+</script>
+
+<h1 id="git-under-the-hood">Git Under the Hood</h1>
+<h2 id="from-version-control-to-distributed-collaboration">From Version Control to Distributed Collaboration</h2>
+<p>Siyuan He (Robert)</p>
+<p>Computer Psycho Union · 30 October 2026</p>
+<h3 id="weekly-02">WEEKLY 02</h3>
+<h4 id="cpu-202627">CPU 2026/27</h4>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="2" data-paginate="true" data-class="agenda" data-theme="cpu" lang="C" class="agenda" data-marpit-pagination="2" style="--paginate:true;--class:agenda;--theme:cpu;" data-marpit-pagination-total="39">
+<h2 id="what-we-will-cover">What we will cover</h2>
+<ol>
+<li>Version history you already know <em>- Feishu · Word · WPS</em></li>
+<li>Stage and commit in VS Code <em>- user-friendly GUI</em></li>
+<li>What a commit really is <em>- snapshots and fingerprints</em></li>
+<li>Branches and merging <em>- when history forks</em></li>
+<li>Git and GitHub <em>- push · fetch · pull · stash</em></li>
+</ol>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="3" data-paginate="true" data-class="yellow" data-theme="cpu" lang="C" class="yellow" data-marpit-pagination="3" style="--paginate:true;--class:yellow;--theme:cpu;" data-marpit-pagination-total="39">
+<h2 id="session-1">SESSION 1</h2>
+<h3 id="01">01</h3>
+<h4 id="from-saving-files-to-building-history">From Saving Files to Building History</h4>
+<p>Why Git exists · how a commit is born · your first commit</p>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="4" data-paginate="true" data-theme="cpu" lang="C" data-marpit-pagination="4" style="--paginate:true;--theme:cpu;" data-marpit-pagination-total="39">
+<h2 id="01--the-old-school-way">01 · The old-school way</h2>
+<ul>
+<li><strong>Save-as forever</strong> — every &quot;final&quot; version is a new file</li>
+<li><strong>Copy the folder</strong> — <code>project_backup_before_refactor/</code></li>
+<li><strong>Which one is real? What changed? How do I go back?</strong></li>
+</ul>
+<pre><code class="language-mermaid">%%{init: {&quot;themeVariables&quot;: {&quot;fontSize&quot;: &quot;14px&quot;}}}%%
+graph LR
+  A[&quot;main.py&quot;] --&gt; B[&quot;main_old.py&quot;] --&gt; C[&quot;main_new.py&quot;] --&gt; D[&quot;main_final.py&quot;] --&gt; E[&quot;main_final_really_final.py&quot;]
+</code></pre>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="5" data-marpit-scope-Y4dxTH6Z="" data-paginate="true" data-class="side" data-theme="cpu" lang="C" class="side" data-marpit-pagination="5" style="--paginate:true;--class:side;--theme:cpu;" data-marpit-pagination-total="39">
+<p><img src="assets/feishu.png" alt="" style="width:610px;" /></p>
+
+<h2 id="02--version-history-that-you-already-know">02 · Version history that YOU ALREADY KNOW</h2>
+<h3 id="the-panel-you-never-named">THE PANEL YOU NEVER NAMED</h3>
+<p>Feishu / WPS: open history, restore any autosave, see who changed what.</p>
+<br />
+<h3 id="word--powerpoint">WORD &amp; POWERPOINT</h3>
+<p>Autosave plus version history — mistakes become reversible.</p>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="6" data-paginate="true" data-theme="cpu" lang="C" data-marpit-pagination="6" style="--paginate:true;--theme:cpu;" data-marpit-pagination-total="39">
+<h2 id="03--why-code-needs-its-own-tool">03 · Why code needs its own tool</h2>
+<ul>
+<li><strong>A project is a forest</strong> — hundreds of files and folders, not one document</li>
+<li><strong>Locked to a product</strong> — offline it is gone, no self-hosting
+<ul>
+<li><em>UNNC Living outage: 1000 lines of online edits overwritten</em></li>
+</ul>
+</li>
+<li><strong>No parallel tries</strong> — no way to keep two versions alive at once</li>
+<li><strong>Merging</strong> — two people, one file: code auto-merges most of it</li>
+</ul>
+<p><img src="assets/project-forest.png" alt="" style="width:1000px;" /></p>
+<p><em>Version control solves the same problem — for code.</em></p>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="7" data-paginate="true" data-theme="cpu" lang="C" data-marpit-pagination="7" style="--paginate:true;--theme:cpu;" data-marpit-pagination-total="39">
+<h2 id="04--meet-git-and-its-ancestor-svn">04 · Meet Git (and its ancestor SVN)</h2>
+<ul>
+<li><strong>SVN — centralized</strong> — one server holds the history; offline means stuck</li>
+<li><strong>Git — distributed</strong> — every clone holds the full history
+<ul>
+<li><strong>Born 2005</strong> — Linus Torvalds, built for Linux; today's industry standard</li>
+</ul>
+</li>
+</ul>
+<p><em>Centralized vs distributed — the full table in Session 2.</em></p>
+<div class="columns">
+<div class="column">
+<p><img src="assets/logo-svn.webp" alt="" style="width:200px;" /></p>
+</div>
+<div class="column">
+<p><img src="assets/logo-git.webp" alt="" style="width:240px;" /></p>
+</div>
+</div>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="8" data-paginate="true" data-theme="cpu" lang="C" data-marpit-pagination="8" style="--paginate:true;--theme:cpu;" data-marpit-pagination-total="39">
+<h2 id="05--two-places-one-click">05 · Two places, one click</h2>
+<ul>
+<li><strong>Working Tree</strong> — the files you are editing - <em>your desk</em></li>
+<li><strong>Local Repository</strong> — the saved commit history - <em>the archive</em></li>
+<li><strong>Demo</strong> — edit <code>main.py</code> · type a message · Commit — a new commit exists</li>
+</ul>
+<p><img src="assets/two-places.png" alt="" style="width:1000px;" /></p>
+<p><em>Saving a file is not recording history. Committing is.</em></p>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="9" data-paginate="true" data-class="side" data-theme="cpu" lang="C" class="side" data-marpit-pagination="9" style="--paginate:true;--class:side;--theme:cpu;" data-marpit-pagination-total="39">
+<p><img src="assets/vscode-scm.png" alt="" style="height:740px;" /></p>
+
+<h2 id="06--the-hidden-third-place">06 · The hidden third place</h2>
+<h3 id="the-need">THE NEED</h3>
+<p>Bug fix, new feature, README tweak — commit only the fix.</p>
+<br />
+<h3 id="the-answer">THE ANSWER</h3>
+<p>Stage (+) picks what the next commit contains. Your one-click commit was staging everything silently.</p>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="10" data-paginate="true" data-theme="cpu" lang="C" data-marpit-pagination="10" style="--paginate:true;--theme:cpu;" data-marpit-pagination-total="39">
+<h2 id="07--edit-stage-commit">07 · Edit, stage, commit</h2>
+<ul>
+<li><strong>Edit</strong> — change files in the editor</li>
+<li><strong>Stage (+)</strong> — pick what goes into the next commit</li>
+<li><strong>Commit (check)</strong> — write history with a message</li>
+<li><em>Fine-grained: stage single hunks in the diff view</em></li>
+</ul>
+<p><img src="assets/stage-commit.png" alt="" style="width:760px;" /></p>
+<p><strong>A commit is chosen, not dumped.</strong></p>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="11" data-paginate="true" data-theme="cpu" lang="C" data-marpit-pagination="11" style="--paginate:true;--theme:cpu;" data-marpit-pagination-total="39">
+<h2 id="08--keep-some-files-out-of-history">08 · Keep some files out of history</h2>
+<ul>
+<li><strong><code>.gitignore</code></strong> — the list of files Git should pretend not to see - <em>caches · builds · secrets</em></li>
+<li><strong><code>.git</code></strong> — the hidden folder where the whole history lives - <em>never edit it, never commit it</em></li>
+<li><em>In VS Code: create <code>.gitignore</code> in the repo root — those files vanish from Changes</em></li>
+</ul>
+<p><img src="assets/gitignore.png" alt="" style="width:900px;" /></p>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="12" data-paginate="true" data-theme="cpu" lang="C" data-marpit-pagination="12" style="--paginate:true;--theme:cpu;" data-marpit-pagination-total="39">
+<h2 id="09--what-a-commit-really-is">09 · What a commit really is</h2>
+<ul>
+<li><strong>Not</strong> a log of every keystroke</li>
+<li><strong>A snapshot</strong> — the whole project at that moment</li>
+<li><strong>Plus a note</strong> — who, when, what and why</li>
+</ul>
+<pre><code class="language-mermaid">graph LR
+  subgraph CA[&quot;Commit A — snapshot + note&quot;]
+    direction TB
+    PA[&quot;#8203;&quot;]:::pad
+    F1[&quot;main.py&quot;]
+    F2[&quot;utils.py&quot;]
+    PA ~~~ F1
+    PA ~~~ F2
+  end
+  subgraph CB[&quot;Commit B — snapshot + note&quot;]
+    direction TB
+    PB[&quot;#8203;&quot;]:::pad
+    G1[&quot;main.py*&quot;]
+    G2[&quot;utils.py*&quot;]
+    PB ~~~ G1
+    PB ~~~ G2
+  end
+  CA -.-&gt; CB
+  classDef pad fill:none,stroke:none,color:none
+</code></pre>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="13" data-paginate="true" data-theme="cpu" lang="C" data-marpit-pagination="13" style="--paginate:true;--theme:cpu;" data-marpit-pagination-total="39">
+<h2 id="10--the-commit-id-is-a-fingerprint">10 · The commit ID is a fingerprint</h2>
+<ul>
+<li><strong>Same content, same ID</strong> — identical in every clone</li>
+<li><strong>One character changed, whole ID changes</strong> — tamper-evident</li>
+<li><strong>No way back from ID to content</strong> — a fingerprint, not a zip</li>
+</ul>
+<pre><code class="language-mermaid">graph LR
+  C[&quot;content&quot;] --&gt; H[&quot;hash&quot;] --&gt; I[&quot;ID · a1b2c3d&quot;]
+</code></pre>
+<p><em>Hash underneath: SHA-1, or SHA-256 on newer repos — names only.</em></p>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="14" data-paginate="true" data-theme="cpu" lang="C" data-marpit-pagination="14" style="--paginate:true;--theme:cpu;" data-marpit-pagination-total="39">
+<h2 id="11--history-is-a-line">11 · History is a line</h2>
+<ul>
+<li>Every commit remembers its <strong>previous</strong> one</li>
+<li>The line only grows — nothing in the middle is ever edited</li>
+</ul>
+<pre><code class="language-mermaid">graph LR
+  A --&gt; B --&gt; C --&gt; D
+</code></pre>
+<p><em>So when does the line fork? After the break.</em></p>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="15" data-paginate="true" data-theme="cpu" lang="C" data-marpit-pagination="15" style="--paginate:true;--theme:cpu;" data-marpit-pagination-total="39">
+<h2 id="12--a-branch---a-movable-bookmark">12 · A Branch -&gt; a movable bookmark</h2>
+<ul>
+<li>A branch is <strong>not a copy</strong> of the project — it is a bookmark on a commit</li>
+<li>Creating and moving it costs almost nothing</li>
+</ul>
+<pre><code class="language-mermaid">graph LR
+  A --&gt; B --&gt; C --&gt; D
+  main([&quot;main&quot;]) --&gt; D
+</code></pre>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="16" data-paginate="true" data-theme="cpu" lang="C" data-marpit-pagination="16" style="--paginate:true;--theme:cpu;" data-marpit-pagination-total="39">
+<h2 id="13--head-where-you-stand">13 · HEAD: where you stand</h2>
+<ul>
+<li><strong>HEAD</strong> — the bookmark you are currently standing on</li>
+<li>It decides where your next commit lands</li>
+</ul>
+<pre><code class="language-mermaid">graph TD
+  HEAD([&quot;HEAD&quot;]) --&gt; main([&quot;main&quot;])
+  main --&gt; D[&quot;Commit D&quot;]
+</code></pre>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="17" data-paginate="true" data-class="yellow" data-theme="cpu" lang="C" class="yellow" data-marpit-pagination="17" style="--paginate:true;--class:yellow;--theme:cpu;" data-marpit-pagination-total="39">
+<h2 id="hands-on">HANDS-ON</h2>
+<h3 id="02">02</h3>
+<h4 id="your-first-commit">Your First Commit</h4>
+<p>Everyone leaves this room with one commit on their machine</p>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="18" data-paginate="true" data-class="activities" data-theme="cpu" lang="C" class="activities" data-marpit-pagination="18" style="--paginate:true;--class:activities;--theme:cpu;" data-marpit-pagination-total="39">
+<h2 id="14--fifteen-minutes-four-steps">14 · Fifteen minutes, four steps</h2>
+<div class="columns">
+<div class="column">
+<h3 id="1--sign-in">1 · SIGN IN</h3>
+<ul>
+<li>Account icon (bottom-left)</li>
+<li>Sign in with GitHub</li>
+<li>Authorize in the browser.</li>
+</ul>
+<h3 id="2--init">2 · INIT</h3>
+<ul>
+<li>New folder <code>git-practice</code></li>
+<li>Open in VS Code, go <code>Source Control</code></li>
+<li>Click <code>Initialize Repository</code></li>
+</ul>
+</div>
+<div class="column">
+<h3 id="3--commit">3 · COMMIT</h3>
+<ul>
+<li>Create <code>main.py</code></li>
+<li>Stage all + <code>Initial commit</code> + Commit</li>
+<li>Find your commit in the graph.</li>
+</ul>
+<br />
+<h3 id="4--feel-the-stage">4 · FEEL THE STAGE</h3>
+<p>Two files &amp; two commits.<br />
+You choose what each one contains.</p>
+</div>
+</div>
+<p><em>No Git yet? Click Download Git in the prompt and follow it.</em></p>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="19" data-paginate="true" data-theme="cpu" lang="C" data-marpit-pagination="19" style="--paginate:true;--theme:cpu;" data-marpit-pagination-total="39">
+<h2 id="15--before-the-break">15 · Before the break</h2>
+<ul>
+<li>Why are <strong>stage</strong> and <strong>commit</strong> two separate steps?</li>
+<li>What does a commit store — keystrokes, or a snapshot?</li>
+<li>What are a <strong>branch</strong> and <strong>HEAD</strong>?</li>
+</ul>
+<p><em>Stuck? Raise a hand, or open an issue in the repo.</em></p>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="20" data-paginate="true" data-class="yellow" data-theme="cpu" lang="C" class="yellow" data-marpit-pagination="20" style="--paginate:true;--class:yellow;--theme:cpu;" data-marpit-pagination-total="39">
+<h2 id="break">BREAK</h2>
+<h3 id="10-1">10</h3>
+<h4 id="minutes">MINUTES</h4>
+<p>Back soon — Session 2 forks from here</p>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="21" data-paginate="true" data-class="yellow" data-theme="cpu" lang="C" class="yellow" data-marpit-pagination="21" style="--paginate:true;--class:yellow;--theme:cpu;" data-marpit-pagination-total="39">
+<h2 id="session-2">SESSION 2</h2>
+<h3 id="03">03</h3>
+<h4 id="from-branches-to-distributed-collaboration">From Branches to Distributed Collaboration</h4>
+<p>Branches · merging · conflicts · GitHub</p>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="22" data-paginate="true" data-class="side" data-theme="cpu" lang="C" class="side" data-marpit-pagination="22" style="--paginate:true;--class:side;--theme:cpu;" data-marpit-pagination-total="39">
+<p><img src="assets/commit-graph.png" alt="" style="height:685px;" /></p>
+
+<h2 id="16--when-history-forks">16 · When history forks</h2>
+<h3 id="several-lines-at-once">SEVERAL LINES AT ONCE</h3>
+<p>Keep one line stable, try ideas on another.</p>
+<h3 id="separate--merge">SEPARATE &amp; MERGE</h3>
+<p>History stops being a line and becomes a graph — a family tree, a river delta.</p>
+<h4 id="graph">GRAPH</h4>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="23" data-paginate="true" data-theme="cpu" lang="C" data-marpit-pagination="23" style="--paginate:true;--theme:cpu;" data-marpit-pagination-total="39">
+<h2 id="17--branch-try-safely-switch-fast">17 · Branch: try safely, switch fast</h2>
+<ul>
+<li><strong>Try safely</strong> — new algorithm on the side, the stable line untouched</li>
+<li><strong>Nothing is copied</strong> — a branch is just another bookmark</li>
+<li><strong>How?</strong> — Source Control → click the branch name (top-right) → Create Branch<br />
+<br /></li>
+</ul>
+<p><img src="assets/branches.png" alt="" style="width:1050px;" /></p>
+<pre><code class="language-mermaid">graph LR
+  A --&gt; B --&gt; C
+  C --&gt; D --&gt; E
+  main([&quot;main&quot;]) --&gt; C
+  feature([&quot;feature&quot;]) --&gt; E
+</code></pre>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="24" data-paginate="true" data-theme="cpu" lang="C" data-marpit-pagination="24" style="--paginate:true;--theme:cpu;" data-marpit-pagination-total="39">
+<h2 id="18--merge-a-fast-forward">18 · Merge A: fast-forward</h2>
+<ul>
+<li>Your line never moved — Git just <strong>slides the bookmark forward</strong></li>
+<li>No new commit is created</li>
+</ul>
+<pre><code class="language-mermaid">graph LR
+  A --&gt; B --&gt; C --&gt; D --&gt; E
+  main([&quot;main&quot;]) --&gt; C
+  feature([&quot;feature&quot;]) --&gt; E
+</code></pre>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="25" data-paginate="true" data-theme="cpu" lang="C" data-marpit-pagination="25" style="--paginate:true;--theme:cpu;" data-marpit-pagination-total="39">
+<h2 id="19--merge-b-three-way">19 · Merge B: three-way</h2>
+<ul>
+<li>Both lines moved — Git compares <strong>base, yours, theirs</strong></li>
+<li>The result is one new <strong>merge commit</strong> with two parents</li>
+</ul>
+<pre><code class="language-mermaid">graph LR
+  A --&gt; B --&gt; C
+  C --&gt; D[&quot;main&quot;]
+  C --&gt; E[&quot;feature&quot;]
+  D --&gt; M[&quot;merge commit&quot;]
+  E --&gt; M
+</code></pre>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="26" data-paginate="true" data-class="side" data-theme="cpu" lang="C" class="side" data-marpit-pagination="26" style="--paginate:true;--class:side;--theme:cpu;" data-marpit-pagination-total="39">
+<p><img src="assets/conflict.png" alt="" style="height:620px;" /></p>
+
+<h2 id="20--conflicts-are-not-errors">20 · Conflicts are not errors</h2>
+<h3 id="same-lines-different-wishes">SAME LINES, DIFFERENT WISHES</h3>
+<p>Git refuses to guess which version you meant.</p>
+<br />
+<h3 id="you-decide">YOU DECIDE</h3>
+<p>Resolve, stage, commit - history moves on.</p>
+<h4 id="resolve">RESOLVE</h4>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="27" data-paginate="true" data-theme="cpu" lang="C" data-marpit-pagination="27" style="--paginate:true;--theme:cpu;" data-marpit-pagination-total="39">
+<h2 id="21--two-small-undos">21 · Two small undos</h2>
+<ul>
+<li><strong>Discard (undo arrow)</strong> — drop changes you never staged</li>
+<li><strong>Unstage (minus)</strong> — take things out of the next commit</li>
+</ul>
+<p><img src="assets/discard.png" alt="" style="width:960px;" /></p>
+<p><em>Both live on the file rows in Source Control — hover to see them.</em></p>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="28" data-paginate="true" data-theme="cpu" lang="C" data-marpit-pagination="28" style="--paginate:true;--theme:cpu;" data-marpit-pagination-total="39">
+<h2 id="22--undo-last-commit">22 · Undo Last Commit</h2>
+<ul>
+<li>Source Control <strong><code>···</code></strong> → Commit → <strong>Undo Last Commit</strong></li>
+<li>The commit unwraps: history goes back one step, the <strong>changes wait in Staged Changes</strong></li>
+</ul>
+<pre><code class="language-mermaid">graph LR
+  A --&gt; B --&gt; C --&gt; D[&quot;D — the mistake&quot;]
+  D -.-&gt;|&quot;Undo Last Commit&quot;| S[&quot;changes → Staged Changes&quot;]
+</code></pre>
+<br />
+<p><em>Unwrapping a commit loses nothing.</em><br />
+<em>Pushed already? Fix forward — rewriting shared history needs force push.</em></p>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="29" data-paginate="true" data-theme="cpu" lang="C" data-marpit-pagination="29" style="--paginate:true;--theme:cpu;" data-marpit-pagination-total="39">
+<h2 id="23--git-is-not-github">23 · Git is not GitHub</h2>
+<table>
+<thead>
+<tr>
+<th>Git</th>
+<th>GitHub</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A version control system</td>
+<td>A hosting platform for Git repos</td>
+</tr>
+<tr>
+<td>Runs locally, works offline</td>
+<td>Stores remotes, enables sharing</td>
+</tr>
+<tr>
+<td>Your history lives with you</td>
+<td>The meeting place for histories</td>
+</tr>
+</tbody>
+</table>
+<pre><code class="language-mermaid">graph LR
+  L[&quot;Git — on your PC&quot;]
+  GH[&quot;GitHub — cloud&quot;]
+  L -.-&gt;|&quot;Push / Pull&quot;| GH
+</code></pre>
+<ul>
+<li><em>Committing needs no internet</em></li>
+</ul>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="30" data-paginate="true" data-theme="cpu" lang="C" data-marpit-pagination="30" style="--paginate:true;--theme:cpu;" data-marpit-pagination-total="39">
+<h2 id="24--distributed-git-vs-svn">24 · Distributed: Git vs SVN</h2>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>SVN</th>
+<th>Git</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>History lives</td>
+<td>one central server</td>
+<td>in every clone</td>
+</tr>
+<tr>
+<td>Commit offline</td>
+<td>no</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>Server unreachable</td>
+<td>no commits, no history</td>
+<td>everyone still commits</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><em>SVN: edits and diffs still work offline — committing and history need the server.</em></li>
+<li><em>Git: the whole history is on your laptop — commit on a plane.</em></li>
+</ul>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="31" data-paginate="true" data-theme="cpu" lang="C" data-marpit-pagination="31" style="--paginate:true;--theme:cpu;" data-marpit-pagination-total="39">
+<h2 id="25--remote-who-do-i-sync-with">25 · Remote: who do I sync with?</h2>
+<ul>
+<li>A <strong>remote</strong> is a named link to another repository</li>
+<li><code>origin</code> is just the default name — nothing magical</li>
+<li><strong>In VS Code</strong> — cloning already wired <code>origin</code> for you</li>
+</ul>
+<pre><code class="language-mermaid">graph LR
+  R[&quot;your repository&quot;]
+  O1([&quot;upstream&quot;])
+  O2([&quot;origin&quot;])
+  GH1[&quot;github/CPU/repo&quot;]
+  GH2[&quot;github/YOU/repo&quot;]
+  R --- O1
+  R --- O2
+  O1 --- GH1
+  O2 --- GH2
+</code></pre>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="32" data-paginate="true" data-class="side" data-theme="cpu" lang="C" class="side" data-marpit-pagination="32" style="--paginate:true;--class:side;--theme:cpu;" data-marpit-pagination-total="39">
+<p><img src="assets/pushpull.png" alt="" style="height:550px;" /></p>
+
+<h2 id="26--push-publish-your-commits">26 · Push: publish your commits</h2>
+<h3 id="the-question">THE QUESTION</h3>
+<p>I finished commits locally — how do others see them?</p>
+<br />
+<h3 id="the-entries">THE ENTRIES</h3>
+<p>Status Bar → Publish Branch · Source Control <strong><code>···</code></strong> → Pull, Push → Push.</p>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="33" data-paginate="true" data-theme="cpu" lang="C" data-marpit-pagination="33" style="--paginate:true;--theme:cpu;" data-marpit-pagination-total="39">
+<h2 id="27--fetch-look-dont-merge">27 · Fetch: look, don't merge</h2>
+<ul>
+<li>Downloads the remote's new commits and moves <strong>origin/main</strong></li>
+<li>Your own <strong>main</strong> stays exactly where it was</li>
+</ul>
+<pre><code class="language-mermaid">graph LR
+  om([&quot;origin/main&quot;]) --&gt; D[&quot;Commit D&quot;]
+  main([&quot;main&quot;]) --&gt; C[&quot;Commit C&quot;]
+</code></pre>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="34" data-paginate="true" data-theme="cpu" lang="C" data-marpit-pagination="34" style="--paginate:true;--theme:cpu;" data-marpit-pagination-total="39">
+<h2 id="28--pull-fetch-and-integrate">28 · Pull: fetch and integrate</h2>
+<ul>
+<li>Fetch first, then integrate: fast-forward, or a merge</li>
+<li>Your line and the remote line meet again</li>
+</ul>
+<pre><code class="language-mermaid">graph LR
+  A --&gt; B --&gt; C[&quot;C · your main&quot;]
+  B --&gt; D[&quot;D · remote main&quot;]
+</code></pre>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="35" data-paginate="true" data-theme="cpu" lang="C" data-marpit-pagination="35" style="--paginate:true;--theme:cpu;" data-marpit-pagination-total="39">
+<h2 id="29--stash-clear-the-desk">29 · Stash: clear the desk</h2>
+<ul>
+<li>Remote box arrives, but unpacked clothes sit on yours — <strong>Pull refuses to stack</strong></li>
+<li><strong>Stash</strong> the clothes, <strong>Pull</strong> the box, <strong>Pop</strong> the clothes back</li>
+</ul>
+<pre><code class="language-mermaid">graph LR
+  W[&quot;uncommitted changes&quot;] -.-&gt;|&quot;1 · Stash&quot;| ST[&quot;on the shelf&quot;]
+  R[&quot;remote updates&quot;] --&gt;|&quot;2 · Pull&quot;| L[&quot;your history&quot;]
+  ST -.-&gt;|&quot;3 · Pop&quot;| W2[&quot;changes are back&quot;]
+</code></pre>
+<p><em>Source Control ··· → Stash → Stash / Pop Latest Stash.</em></p>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="36" data-paginate="true" data-theme="cpu" lang="C" data-marpit-pagination="36" style="--paginate:true;--theme:cpu;" data-marpit-pagination-total="39">
+<h2 id="30--the-whole-picture">30 · The whole picture</h2>
+<pre><code class="language-mermaid">flowchart LR
+  EF[&quot;Edit Files&quot;] --&gt; WT[&quot;Working Tree&quot;]
+  WT --&gt;|&quot;+ Stage&quot;| SA[&quot;Staging Area&quot;]
+  SA --&gt;|&quot;✓ Commit&quot;| LR[&quot;Local Repository&quot;]
+  LR --&gt; BR[&quot;Branch&quot;]
+  LR --&gt; UL[&quot;Undo Last Commit&quot;]
+  LR --&gt;|&quot;Push / Fetch / Pull&quot;| RR[&quot;GitHub&quot;]
+</code></pre>
+<ul>
+<li><em>Everything from today lives somewhere on this map.</em></li>
+</ul>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="37" data-paginate="true" data-class="activities" data-theme="cpu" lang="C" class="activities" data-marpit-pagination="37" style="--paginate:true;--class:activities;--theme:cpu;" data-marpit-pagination-total="39">
+<h2 id="31--clone-this-repo-push-to-yours">31 · Clone this repo, push to yours</h2>
+<div class="columns">
+<div class="column">
+<h3 id="1--clone">1 · CLONE</h3>
+<p>Command Palette — <code>Ctrl+Shift+P</code> (Win) / <code>Cmd+Shift+P</code> (Mac) →</p>
+<p>&quot;Git: Clone&quot; → paste the repo URL.</p>
+<br />
+<h3 id="2--commit">2 · COMMIT</h3>
+<p>Make a small change → stage → commit.</p>
+</div>
+<div class="column">
+<h3 id="3--push">3 · PUSH</h3>
+<p>Click &quot;Sync Changes&quot; → no write permission? → <strong>Create Fork</strong>.</p>
+<br />
+<br />
+<h3 id="4--check">4 · CHECK</h3>
+<p>Visit <code>github.com/&lt;your-username&gt;</code> — your commit is there.</p>
+</div>
+</div>
+<p><em>The whole course, one loop: clone → commit → fork → push.</em></p>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="38" data-paginate="true" data-class="todo" data-theme="cpu" lang="C" class="todo" data-marpit-pagination="38" style="--paginate:true;--class:todo;--theme:cpu;" data-marpit-pagination-total="39">
+<h2 id="appendix">APPENDIX</h2>
+<h3 id="allow-force-push">ALLOW FORCE PUSH</h3>
+<p>Settings → search <code>force push</code> → enable Git: Allow Force Push.</p>
+<h3 id="stay-safe">STAY SAFE</h3>
+<p>Keep Use Force Push With Lease on — it refuses to overwrite unseen commits.</p>
+<ul>
+<li>Full course notes — <code>Session-1/</code> and <code>Session-2/</code> in this folder</li>
+</ul>
+<br />
+<br />
+<br />
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="39" data-paginate="true" data-class="yellow" data-theme="cpu" lang="C" class="yellow" data-marpit-pagination="39" style="--paginate:true;--class:yellow;--theme:cpu;" data-marpit-pagination-total="39">
+<h2 id="thank-you">THANK YOU</h2>
+<h3 id="qa">Q&amp;A</h3>
+<h4 id="start-your-history-today">Start Your History Today</h4>
+<p>Siyuan He (Robert) · Computer Psycho Union · 30 October 2026</p>
+</section>
+<script>!function(){"use strict";const t={h1:{proto:()=>HTMLHeadingElement,attrs:{role:"heading","aria-level":"1"},style:"display: block; font-size: 2em; margin-block-start: 0.67em; margin-block-end: 0.67em; margin-inline-start: 0px; margin-inline-end: 0px; font-weight: bold;"},h2:{proto:()=>HTMLHeadingElement,attrs:{role:"heading","aria-level":"2"},style:"display: block; font-size: 1.5em; margin-block-start: 0.83em; margin-block-end: 0.83em; margin-inline-start: 0px; margin-inline-end: 0px; font-weight: bold;"},h3:{proto:()=>HTMLHeadingElement,attrs:{role:"heading","aria-level":"3"},style:"display: block; font-size: 1.17em; margin-block-start: 1em; margin-block-end: 1em; margin-inline-start: 0px; margin-inline-end: 0px; font-weight: bold;"},h4:{proto:()=>HTMLHeadingElement,attrs:{role:"heading","aria-level":"4"},style:"display: block; margin-block-start: 1.33em; margin-block-end: 1.33em; margin-inline-start: 0px; margin-inline-end: 0px; font-weight: bold;"},h5:{proto:()=>HTMLHeadingElement,attrs:{role:"heading","aria-level":"5"},style:"display: block; font-size: 0.83em; margin-block-start: 1.67em; margin-block-end: 1.67em; margin-inline-start: 0px; margin-inline-end: 0px; font-weight: bold;"},h6:{proto:()=>HTMLHeadingElement,attrs:{role:"heading","aria-level":"6"},style:"display: block; font-size: 0.67em; margin-block-start: 2.33em; margin-block-end: 2.33em; margin-inline-start: 0px; margin-inline-end: 0px; font-weight: bold;"},span:{proto:()=>HTMLSpanElement},pre:{proto:()=>HTMLElement,style:"display: block; font-family: monospace; white-space: pre; margin: 1em 0; --marp-auto-scaling-white-space: pre;"}},e="data-marp-auto-scaling-wrapper",i="data-marp-auto-scaling-svg",n="data-marp-auto-scaling-container";class s extends HTMLElement{container;containerSize;containerObserver;svg;svgComputedStyle;svgPreserveAspectRatio="xMinYMid meet";wrapper;wrapperSize;wrapperObserver;constructor(){super();const t=t=>([e])=>{const{width:i,height:n}=e.contentRect;this[t]={width:i,height:n},this.updateSVGRect()};this.attachShadow({mode:"open"}),this.containerObserver=new ResizeObserver(t("containerSize")),this.wrapperObserver=new ResizeObserver(((...e)=>{t("wrapperSize")(...e),this.flushSvgDisplay()}))}static get observedAttributes(){return["data-downscale-only"]}connectedCallback(){this.shadowRoot.innerHTML=`\n<style>\n  svg[${i}] { display: block; width: 100%; height: auto; vertical-align: top; }\n  span[${n}] { display: table; white-space: var(--marp-auto-scaling-white-space, nowrap); width: max-content; }\n</style>\n<div ${e}>\n  <svg part="svg" ${i}>\n    <foreignObject><span ${n}><slot></slot></span></foreignObject>\n  </svg>\n</div>\n    `.split(/\n\s*/).join(""),this.wrapper=this.shadowRoot.querySelector(`div[${e}]`)??void 0;const t=this.svg;this.svg=this.wrapper?.querySelector(`svg[${i}]`)??void 0,this.svg!==t&&(this.svgComputedStyle=this.svg?window.getComputedStyle(this.svg):void 0),this.container=this.svg?.querySelector(`span[${n}]`)??void 0,this.observe()}disconnectedCallback(){this.svg=void 0,this.svgComputedStyle=void 0,this.wrapper=void 0,this.container=void 0,this.observe()}attributeChangedCallback(){this.observe()}flushSvgDisplay(){const{svg:t}=this;t&&(t.style.display="inline",requestAnimationFrame((()=>{t.style.display=""})))}observe(){this.containerObserver.disconnect(),this.wrapperObserver.disconnect(),this.wrapper&&this.wrapperObserver.observe(this.wrapper),this.container&&this.containerObserver.observe(this.container),this.svgComputedStyle&&this.observeSVGStyle(this.svgComputedStyle)}observeSVGStyle(t){const e=()=>{const i=(()=>{const e=t.getPropertyValue("--preserve-aspect-ratio");if(e)return e.trim();return`x${(({textAlign:t,direction:e})=>{if(t.endsWith("left"))return"Min";if(t.endsWith("right"))return"Max";if("start"===t||"end"===t){let i="rtl"===e;return"end"===t&&(i=!i),i?"Max":"Min"}return"Mid"})(t)}YMid meet`})();i!==this.svgPreserveAspectRatio&&(this.svgPreserveAspectRatio=i,this.updateSVGRect()),t===this.svgComputedStyle&&requestAnimationFrame(e)};e()}updateSVGRect(){let t=Math.ceil(this.containerSize?.width??0);const e=Math.ceil(this.containerSize?.height??0);void 0!==this.dataset.downscaleOnly&&(t=Math.max(t,this.wrapperSize?.width??0));const i=this.svg?.querySelector(":scope > foreignObject");if(i?.setAttribute("width",`${t}`),i?.setAttribute("height",`${e}`),this.svg&&(this.svg.setAttribute("viewBox",`0 0 ${t} ${e}`),this.svg.setAttribute("preserveAspectRatio",this.svgPreserveAspectRatio),this.svg.style.height=t<=0||e<=0?"0":""),this.container){const t=this.svgPreserveAspectRatio.toLowerCase();this.container.style.marginLeft=t.startsWith("xmid")||t.startsWith("xmax")?"auto":"0",this.container.style.marginRight=t.startsWith("xmi")?"auto":"0"}}}const r=(t,{attrs:e={},style:i})=>class extends t{constructor(...t){super(...t);for(const[t,i]of Object.entries(e))this.hasAttribute(t)||this.setAttribute(t,i);this._shadow()}static get observedAttributes(){return["data-auto-scaling"]}connectedCallback(){this._update()}attributeChangedCallback(){this._update()}_shadow(){if(!this.shadowRoot)try{this.attachShadow({mode:"open"})}catch(t){if(!(t instanceof Error&&"NotSupportedError"===t.name))throw t}return this.shadowRoot}_update(){const t=this._shadow();if(t){const e=i?`<style>:host { ${i} }</style>`:"";let n="<slot></slot>";const{autoScaling:s}=this.dataset;if(void 0!==s){n=`<marp-auto-scaling exportparts="svg:auto-scaling" ${"downscale-only"===s?"data-downscale-only":""}>${n}</marp-auto-scaling>`}t.innerHTML=e+n}}};let o;const a=Symbol();let l;const c="marpitSVGPolyfill:setZoomFactor,",d=Symbol(),h=Symbol();const g=()=>{const t="Apple Computer, Inc."===navigator.vendor,e=t?[u]:[],i={then:e=>(t?(async()=>{if(void 0===l){const t=document.createElement("canvas");t.width=10,t.height=10;const e=t.getContext("2d"),i=new Image(10,10),n=new Promise((t=>{i.addEventListener("load",(()=>t()))}));i.crossOrigin="anonymous",i.src="data:image/svg+xml;charset=utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2210%22%20height%3D%2210%22%20viewBox%3D%220%200%201%201%22%3E%3CforeignObject%20width%3D%221%22%20height%3D%221%22%20requiredExtensions%3D%22http%3A%2F%2Fwww.w3.org%2F1999%2Fxhtml%22%3E%3Cdiv%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F1999%2Fxhtml%22%20style%3D%22width%3A%201px%3B%20height%3A%201px%3B%20background%3A%20red%3B%20position%3A%20relative%22%3E%3C%2Fdiv%3E%3C%2FforeignObject%3E%3C%2Fsvg%3E",await n,e.drawImage(i,0,0),l=e.getImageData(5,5,1,1).data[3]<128}return l})().then((t=>{null==e||e(t?[u]:[])})):null==e||e([]),i)};return Object.assign(e,i)};let p,m;function u(t){const e="object"==typeof t&&t.target||document,i="object"==typeof t?t.zoom:t;window[h]||(Object.defineProperty(window,h,{configurable:!0,value:!0}),document.body.style.zoom=1.0001,document.body.offsetHeight,document.body.style.zoom=1,window.addEventListener("message",(({data:t,origin:e})=>{if(e===window.origin)try{if(t&&"string"==typeof t&&t.startsWith(c)){const[,e]=t.split(","),i=Number.parseFloat(e);Number.isNaN(i)||(m=i)}}catch(t){console.error(t)}})));let n=!1;Array.from(e.querySelectorAll("svg[data-marpit-svg]"),(t=>{var e,s,r,o;t.style.transform||(t.style.transform="translateZ(0)");const a=i||m||t.currentScale||1;p!==a&&(p=a,n=a);const l=t.getBoundingClientRect(),{length:c}=t.children;for(let i=0;i<c;i+=1){const n=t.children[i];if(n.getScreenCTM){const t=n.getScreenCTM();if(t){const i=null!==(s=null===(e=n.x)||void 0===e?void 0:e.baseVal.value)&&void 0!==s?s:0,c=null!==(o=null===(r=n.y)||void 0===r?void 0:r.baseVal.value)&&void 0!==o?o:0,d=n.children.length;for(let e=0;e<d;e+=1){const s=n.children[e];if("SECTION"===s.tagName){const{style:e}=s;e.transformOrigin||(e.transformOrigin=`${-i}px ${-c}px`),e.transform=`scale(${a}) matrix(${t.a}, ${t.b}, ${t.c}, ${t.d}, ${t.e-l.left}, ${t.f-l.top}) translateZ(0.0001px)`;break}}}}}})),!1!==n&&Array.from(e.querySelectorAll("iframe"),(({contentWindow:t})=>{null==t||t.postMessage(`${c}${n}`,"null"===window.origin?"*":window.origin)}))}function v({once:t=!1,target:e=document}={}){const i=function(t=document){if(t[d])return t[d];let e=!0;const i=()=>{e=!1,delete t[d]};Object.defineProperty(t,d,{configurable:!0,value:i});let n=[],s=!1;(async()=>{try{n=await g()}finally{s=!0}})();const r=()=>{for(const e of n)e({target:t});s&&0===n.length||e&&window.requestAnimationFrame(r)};return r(),i}(e);return t?(i(),()=>{}):i}p=1,m=void 0;const w=Symbol(),b=(e=document)=>{if("undefined"==typeof window)throw new Error("Marp Core's browser script is valid only in browser context.");if(((e=document)=>{const i=window[a];i||customElements.define("marp-auto-scaling",s);for(const n of Object.keys(t)){const s=`marp-${n}`,a=t[n].proto();(o??(o=!!document.createElement("div",{is:"marp-auto-scaling"}).outerHTML.startsWith("<div is"),o))&&a!==HTMLElement?i||customElements.define(s,r(a,{style:t[n].style}),{extends:n}):(i||customElements.define(s,r(HTMLElement,t[n])),e.querySelectorAll(`${n}[is="${s}"]`).forEach((t=>{t.outerHTML=t.outerHTML.replace(new RegExp(`^<${n}`,"i"),`<${s}`).replace(new RegExp(`</${n}>$`,"i"),`</${s}>`)})))}window[a]=!0})(e),e[w])return e[w];const i=v({target:e}),n=()=>{i(),delete e[w]},l=Object.assign(n,{cleanup:n,update:()=>b(e)});return Object.defineProperty(e,w,{configurable:!0,value:l}),l},y=document.currentScript;b(y?y.getRootNode():document)}();
+</script></foreignObject></svg></div><div class="bespoke-marp-note" data-index="3" tabindex="0"><p>假设你正在开发一个 Python 项目。
+
+第一天，你写出了一个可以运行的版本。
+
+第二天，你增加了一个功能。
+
+第三天，你修改了一个算法，但程序开始出现 Bug。
+
+你会怎么做？
+
+可以先展示几种常见方案：
+
+```text
+project/
+├── main.py
+├── main_old.py
+├── main_new.py
+├── main_final.py
+├── main_final_v2.py
+└── main_final_really_final.py
+```
+
+这很有趣，但也揭示了几个实际问题：
+
+- **History：** 我们为什么修改了这段代码？
+- **Recovery：** 怎样回到某个确定的历史版本？
+- **Comparison：** 两个版本究竟有什么区别？
+- **Identity：** 哪个文件才是当前真正使用的版本？
+- **Experimentation：** 我想尝试一种新算法，但又不想破坏现有版本，怎么办？
+
+接下来可以展示另一种常见做法：把整个项目复制成多个文件夹。
+
+```text
+project_backup_1/
+project_backup_2/
+project_backup_before_refactor/
+project_backup_after_refactor/
+```
+
+虽然这样比复制单个文件更可靠，但仍然存在很多问题：
+
+- 不容易知道哪些文件发生了变化。
+- 不容易准确追踪每一次修改。
+- 不容易比较两个版本之间的差异。
+- 随着项目规模扩大，备份会越来越笨重。
+- 不同版本之间的关系并不清晰。</p></div><div class="bespoke-marp-note" data-index="4" tabindex="0"><p>&gt; 飞书文档、金山文档、Word 里那个“历史版本”功能，你用过吗？
+
+你大概率已经享受过“版本管理”，只是没有意识到：
+
+- 飞书 / 金山文档：右上角“历史版本”里躺着每一次自动保存的快照，改坏了可以一键恢复，还能看到谁在什么时候改了什么。
+- Word / PPT：自动保存 + 版本历史；在线协作时还能看到别人的修改痕迹。
+- 这些功能的共同点：**改错了不怕，随时能回到之前的样子。**
+
+可以现场收集一两个“被历史版本救过”的真实故事，气氛会很好。
+
+&gt; **“历史版本”记录的就是你中间改了什么东西——Git 要解决的正是同一类问题，只不过对象是代码。**</p><p>#### YOU KNOW IT</p></div><div class="bespoke-marp-note" data-index="5" tabindex="0"><p>看起来在线文档已经把问题解决了，但把同样的需求放到代码项目上，很快会遇到新情况：
+
+- 代码项目不是一个文件，而是成百上千个文件组成的目录树，文档工具管不住整个文件夹的变化。
+- 这些版本功能绑定在特定产品上：离线不可用、没法部署在自己的服务器上、也难和开发工具配合。
+- 想同时试验两种方案（比如两个算法各写一版再挑好的），文档工具没有“分支”的概念。
+- 多人协作改同一个文件时，代码需要能自动合并大部分修改。
+  - UNNC Living 断网 在线改了 1000 行代码被覆盖
+
+所以程序员需要一个**属于代码的、不依赖某个云服务的版本管理工具**——版本控制系统（Version Control System）。</p></div><div class="bespoke-marp-note" data-index="6" tabindex="0"><p>版本控制系统不止一种。早年的 CVS、SVN 是**集中式**的代表：所有历史放在一台中央服务器上，提交必须连着它——那也是“离开公司网络就干不了活”的时代。Git 则是**分布式**的代表：每个仓库自带完整历史，两者的具体对比放在第二节讲 GitHub 时展开。
+
+Git 由 Linus Torvalds 在 2005 年为开发 Linux 内核而创建，如今几乎是代码版本管理的事实标准。
+
+它的目标不只是帮你保存文件，还要让你能够：
+
+- 记录项目的历史状态。
+- 追踪变化。
+- 定位历史版本。
+- 在不同开发方向之间切换。
+- 在不同的开发历史之间整合修改。
+
+**在线文档的“历史版本”和 Git 解决的是同一类问题——管理变化和历史；只是代码需要一个更专业、更自由的工具。**</p></div><div class="bespoke-marp-note" data-index="7" tabindex="0"><p>从一个动作开始：你修改了 `main.py`，并保存了文件。
+
+此时自然出现第一个需求：**怎么把“现在这个状态”保存成一条以后可以回去的记录？**
+
+回答这个需求，只需要两个区域：
+
+| 区域 | 作用 | 可以怎么理解 |
+| --- | --- | --- |
+| Working Tree | 当前实际编辑的项目文件 | 你的工作台 |
+| Local Repository | 已经保存的提交历史 | 项目的历史档案 |
+
+在 VSCode 中演示“从工作台写入档案柜”，看起来只要一步：
+
+1. 修改 `main.py` 并保存，打开 Source Control view（Activity Bar 中的 Source Control 图标，快捷键 Ctrl+Shift+G）。`main.py` 出现在 `Changes` 列表中——这就是工作区的当前状态（`git status` 回答的问题）。
+2. 在视图顶部的消息框输入提交信息（例如 `Add input validation`）。
+3. 直接点击 **✓ Commit**。 `Changes` 列表清空；打开提交图，可以看到新出现的提交——工作区的状态被写入了本地仓库。
+
+关键在于：**这两个区域不是同一个东西。**
+
+修改文件并保存，只是改变了 Working Tree；只有点击 **✓ Commit** 创建提交之后，这个状态才进入 Local Repository 的历史。
+
+不过，这个“直接提交”的一步里其实藏着一点细节——先记住这个疑问，下一节从一个新的需求出发揭晓它。</p></div><div class="bespoke-marp-note" data-index="8" tabindex="0"><p>这里值得多花一点时间。
+
+假设你修改了三个文件：
+
+```text
+main.py
+parser.py
+README.md
+```
+
+其中：
+
+- `main.py` 修复了一个 Bug。
+- `parser.py` 增加了新功能。
+- `README.md` 只修改了格式。
+
+你希望先提交 Bug 修复，而不把另外两个修改放进去。
+
+如果没有中间的挑选环节，你可能需要手动复制文件、撤销部分修改，或者想办法把修改拆开。
+
+这正是第三个区域存在的原因——**Staging Area（暂存区，也叫 Index）**：准备纳入下一次提交的内容，可以理解为**下一份提交的草稿**。它位于工作台和档案柜之间：先挑选要归档的内容放进草稿，再统一写入历史。
+
+回头再看上一节的演示：点击 **✓ Commit** 时， `Changes` 列表里还有未暂存的内容，VSCode 其实替你多做了一步——先把它们放进暂存区（对应 `git add`），再创建提交（对应 `git commit`）。暂存区一直都在，只是被“直接提交”的便利藏在了幕后；当你需要只提交一部分修改时，它才走到台前。
+
+在 VSCode 中，这只意味着：只点击 `main.py` 旁边的 **+**（只暂存这一个文件），然后输入 `Fix input validation`，点击 **✓ Commit** 提交。
+
+注意，这并不是说其他文件的修改已经消失了。它们仍然可以留在工作区，等待后续处理。
+
+如果需要更细粒度的控制，VSCode 也支持部分暂存：点击 `Changes` 列表中的文件打开 diff view，把鼠标悬停在某个变更块（hunk）上点击 **+**，就能做到只暂存某个文件中的某一小块代码，而不是整个文件。
+
+这相当于按块、按范围挑选要进入下一次提交的内容。</p></div><div class="bespoke-marp-note" data-index="9" tabindex="0"><p>假设 `main.py` 原本是：
+
+```python
+print(&quot;Hello&quot;)
+```
+
+你把它改成：
+
+```python
+print(&quot;Hello, Git&quot;)
+```
+
+然后在 Source Control view 中点击 `main.py` 旁边的 **+**，完成暂存。
+
+之后，你又把文件改成：
+
+```python
+print(&quot;Hello, Git!&quot;)
+```
+
+最后输入提交信息 `Update greeting`，点击 **✓ Commit** 提交。
+
+问题是：提交里会是什么内容？
+
+**答案是：**
+
+```python
+print(&quot;Hello, Git&quot;)
+```
+
+因为点击 **+** 的那一刻，当时的文件内容已经进入暂存区，之后的修改不会自动更新暂存区。
+
+这非常适合做一次简短的互动提问。
+
+它能直接帮助学生理解为什么“暂存”和“提交”是两个独立步骤。
+
+```text
+Edit → Stage → Commit
+```
+
+它们分别对应：
+
+```text
+修改文件 → 选择提交内容 → 创建历史记录
+```
+
+在 VSCode 中，这三步分别对应：在编辑器中修改文件 → Source Control view 中点击 **+** → 输入提交信息后点击 **✓ Commit**。
+
+建议让学生把这个模型记住，而不是先记住十几个操作。</p></div><div class="bespoke-marp-note" data-index="10" tabindex="0"><p>完成几次提交后，很快会发现两类“不该被记录”的东西：
+
+- **环境杂物**——`.DS_Store`、`__pycache__/`、`node_modules/`、编译产物：每次都变，却没有记录价值，只会把历史撑得又大又乱。
+- **不想公开的内容**——带密码的配置文件、API key：一旦提交，就进了历史，删掉当前版本也删不掉过去的记录。
+
+这正是 `.gitignore` 存在的原因：在仓库根目录放一个名为 `.gitignore` 的文本文件，写上“不进历史”的名单，Git 就会假装看不见它们：
+
+```text
+.DS_Store
+__pycache__/
+*.pyc
+.env
+```
+
+在 VSCode 中：资源管理器中新建文件 `.gitignore`（快捷键新建），写好保存——之后 `Changes` 列表里就不会再出现这些文件。GitHub 创建仓库时也提供现成的忽略模板（Python、Node 等），可以直接选用。
+
+顺带回答一个此阶段必然出现的问题：**历史到底存在哪里？** 就在项目根目录那个隐藏的 `.git` 文件夹里——提交、分支、暂存区全部住在里面。日常不需要打开它，更不要手动修改或把它提交进仓库；把它删掉，历史就消失了（只剩工作区里的文件）。
+
+要判断某个文件夹是否是一个 Git 仓库的重要线索也是看本文件夹下是否有一个 `.git` 目录。如果你想把一个普通文件夹变成一个被 Git 追踪历史的特殊文件夹，只需要在该目录下运行一个 Git 的内置命令 `git init` 或者在 vscode 打开一个文件夹之后在 `Source Control` 面板点击 `Initialize Repository` 按钮即可。</p></div><div class="bespoke-marp-note" data-index="11" tabindex="0"><p>这一部分只回答一个问题，点到为止，不展开内部实现。
+
+先问学生：
+
+&gt; 当你在 VSCode 中点击 **✓ Commit** 创建一次提交时，Git 究竟保存了什么？
+
+很多初学者会认为 Git 主要记录每一次修改的操作，例如：
+
+```text
+1. 在第 3 行增加一个函数
+2. 删除第 5 行
+3. 修改变量名
+```
+
+但 Git 的做法更简单直接：**每次提交，保存项目在这一刻的完整状态（一份快照），再附上一条说明。**
+
+一句话概括：
+
+&gt; **一次提交 = 一份项目快照 + 一条“这次谁改了什么、为什么改”的说明。**
+
+例如，Commit A 记录的是：
+
+```text
+main.py
+utils.py
+README.md
+```
+
+这三个文件在那一刻的样子。你修改了 `main.py` 后创建 Commit B，它记录的又是新一刻的完整样子。</p></div><div class="bespoke-marp-note" data-index="12" tabindex="0"><p>每次提交还会自动附上：作者、时间、你填写的提交说明，以及一个像指纹一样的提交 ID（比如 `a1b2c3d`）。
+
+提交 ID 来自一次**哈希（hash）运算**：把内容交给一个固定的函数，算出一串定长的字符串。记住哈希的三个特性即可：
+
+- **同样的内容，算出的 ID 一定相同。** 所以两处出现同一个 ID，就说明内容完全一致。
+- **内容哪怕只改一个字符，ID 也会整个变掉。** 所以 ID 没变，内容就没被悄悄改动过——相当于自带“防篡改封条”。
+- **没法从 ID 反推出内容。** 它是内容的“指纹”，不是“压缩包”。
+
+顺带一提：Git 传统上使用 SHA-1（40 位十六进制），新仓库也支持 SHA-256——知道名字即可。
+
+至于快照在磁盘上具体怎么存、相同的文件如何复用，属于 Git 的内部实现，这节课刻意不讲。你只需要记住：
+
+&gt; Git 记录的是“项目每个时刻长什么样”，而不是“你敲过的每一步操作”。</p></div><div class="bespoke-marp-note" data-index="13" tabindex="0"><p>每创建一次提交，它都会接在上一次提交的后面，于是项目历史像一条链一样不断向前生长：
+
+```mermaid
+graph LR
+    A -&gt; B -&gt; C -&gt; D
+```
+
+一句话概括：**每个提交都记得自己的“上一个”是哪个提交，所以历史能一路追溯回起点。**
+
+到目前为止，这条线都是直的。它什么时候会“岔开”？岔开之后又怎么合回来？——这是第二节的开场问题，先卖个关子。</p></div><div class="bespoke-marp-note" data-index="14" tabindex="0"><p>仓库里可以同时存在很多提交，Git 需要一种方式标记“值得指认的那些提交”。答案是引用（reference）：**一张贴在某个提交上、可以随时挪动的“书签”**。
+
+例如：
+
+```mermaid
+graph LR
+    main([&quot;main&quot;]) -&gt; C
+```
+
+`main` 就是这样一个引用，此刻指向提交 C。
+
+当你在 `main` 上创建新提交 D 时，Git 不需要改动任何历史，只要把这个引用移动到 D：
+
+```mermaid
+graph LR
+    A -&gt; B -&gt; C -&gt; D
+    main([&quot;main&quot;]) -&gt; D
+```
+
+这也是 Git 中分支非常轻量的原因之一。
+
+分支并不是把整个项目复制一份，而是一个指向提交的可移动引用。
+
+一句话：**分支就是贴在某个提交上的书签，创建和移动它几乎零成本。**</p></div><div class="bespoke-marp-note" data-index="15" tabindex="0"><p>分支和引用都可以有很多个，于是还剩最后一个问题：**你本人现在站在哪个分支上？** 换句话说，下次点击 **✓ Commit** 创建的提交会落到哪个分支？
+
+Git 用一个特殊标记回答：`HEAD` 表示当前检出的版本位置，通常通过当前分支引用间接指向一个提交。
+
+例如：
+
+```mermaid
+graph TD
+    HEAD([&quot;HEAD&quot;]) -&gt; main([&quot;main&quot;])
+    main -&gt; D[&quot;Commit D&quot;]
+```
+
+如果你切换到另一个分支，`HEAD` 的位置也会随之改变——VSCode Status Bar 左下角显示的分支名，反映的正是 `HEAD` 当前所在的分支。
+
+一句话：**HEAD 就是“你现在站在哪”的标记。**
+
+这里可以只介绍概念，不必深入 detached HEAD 等特殊状态。</p></div><div class="bespoke-marp-note" data-index="17" tabindex="0"><p>这一部分留出真正的上机时间，目标只有一个：**每个人现场完成自己的第一次 Commit。**
+
+### 5.0 前置检查：电脑上还没装 Git 怎么办（约 2 分钟）
+
+大部分同学打开 VSCode 后 Source Control view 就能直接用；如果它提示 “Download Git” 或弹出 “Git not found. Would you like to install Git?”，说明系统里还没有 Git。
+
+1. 直接点击提示中的 **Download Git** / **Install** 按钮，按提示一步步装完；macOS 若弹出“需要安装命令行开发者工具”的对话框，点“安装”即可，里面自带 Git。
+2. 装完后按提示**重启 VSCode**。
+3. 重新打开 Source Control view，不再出现该提示，就说明 Git 已就绪。
+
+### 5.1 准备：在 VSCode 中登录 GitHub（约 3 分钟）
+
+1. 点击 VSCode 左下角的账户头像图标 → “Sign in with GitHub”。
+2. 浏览器会打开 GitHub 授权页面，登录并点击 **Authorize visual-studio-code**。
+3. 回到 VSCode，账户图标处显示你的 GitHub 用户名/头像，即登录成功。
+
+登录之后，VSCode 可以直接以你的身份发布、克隆仓库——第二节推送时不再需要现场折腾认证。
+
+### 5.2 创建仓库并完成第一次提交（约 5 分钟）
+
+1. 在电脑上你喜欢的位置新建文件夹 `git-practice`，在 VSCode 中打开：文件 → 打开文件夹。
+2. 打开 Source Control view，点击“Initialize Repository”按钮。
+3. 新建 `main.py`，写一行 `print(&quot;hello, git&quot;)` 并保存——文件立刻出现在 Source Control view 的 `Changes` 列表里。
+4. 消息框输入 `Initial commit`，点击 **✓ Commit**。
+5. 打开提交图（**···** → “View Commit Graph”），找到自己刚创建的第一个提交；点击 `Changes` 里的文件还能打开 diff view。
+
+### 5.3 再来一次，体会暂存区（约 1 分钟，时间允许时）
+
+- 修改 `main.py`，再新建一个 `notes.md`。
+- 这次先只点 `main.py` 旁的 **+** 暂存并提交，再单独暂存提交 `notes.md`。
+- 提交图里出现两次提交——这就是“自己挑选下一次提交包含什么”。</p></div><div class="bespoke-marp-note" data-index="18" tabindex="0"><p>### Session 1 核心结论
+
+- 一次提交 = 项目快照 + 一条“改了什么”的说明。
+- 提交连成历史，分支是书签，HEAD 标记你现在的位置。
+
+记住这三句话，第二节的一切都会顺理成章。
+
+### 5.4 下课前三个问题
+
+1. 为什么“暂存”和“提交”是两个不同的步骤？
+2. 一次提交里保存的是什么——是你的每一步操作，还是项目那一刻的样子？
+3. 分支和 HEAD 分别是什么？
+
+最后用一句话收束：
+
+&gt; Git records snapshots, connects them into history, and gives us ways to navigate that history.
+
+走动帮同学排障，常见问题：没装 Git（按 5.0 点提示按钮装好并重启）、GitHub 没登录成功、文件夹没有在 VSCode 中打开、误把整个主目录初始化成仓库。没跟上的同学可以课后照着 5.0–5.2 补齐，或到仓库 issue 提问。</p></div><div class="bespoke-marp-note" data-index="21" tabindex="0"><p>第一节里，我们看到的提交历史都是一条直线：新提交接在旧提交后面，一路向前。
+
+但真实的开发常常需要**几条线同时推进**：一条保持稳定可用，另一条拿去做试验。一旦几条线从同一个版本出发各自延伸、之后又汇合，历史就不再是一条线，而是一张会**分叉和汇合的图（Graph）**——像家谱，也像河流的分叉与合流：
+
+```mermaid
+graph LR
+    A -&gt; B -&gt; C
+    C -&gt; D -&gt; E
+    C -&gt; F -&gt; G
+    E -&gt; M[&quot;M&quot;]
+    G -&gt; M
+```
+
+第二节的所有主角——分支、合并、冲突、撤销——都是在这张图上发生的故事。先从“为什么需要岔出一条线”讲起。</p></div><div class="bespoke-marp-note" data-index="22" tabindex="0"><p>假设项目历史如下：
+
+```mermaid
+graph LR
+    A -&gt; B -&gt; C
+```
+
+现在你想增加一个新功能。
+
+一种方法是在当前版本上直接修改：
+
+```mermaid
+graph LR
+    A -&gt; B -&gt; C -&gt; D
+```
+
+但如果你不确定这个功能能否成功，就会面临一个问题：
+
+**如何在保留现有稳定版本的同时，安全地尝试新方案？**
+
+如果每次尝试都复制整个项目，会出现之前讨论过的问题。
+
+Git 的分支允许你在现有历史基础上创建另一条开发路径。
+
+### 1.2 Branch 是什么？
+
+满足这个需求的方案，就是在现有历史基础上分出一条可以独立推进的开发路径。例如：
+
+```mermaid
+graph LR
+    A -&gt; B -&gt; C
+    C -&gt; D -&gt; E
+    main([&quot;main&quot;]) -&gt; C
+    feature([&quot;feature&quot;]) -&gt; E
+```
+
+这个图表示：
+
+- `main` 仍然指向 C。
+- `feature` 指向 E。
+- 两个分支共享之前的历史，但后续提交可以不同。
+
+历史在这里第一次“岔开”——正是前奏里那张图的最小版本：一条线停在 C，另一条继续走到 E。
+
+分支的重点是：**允许不同的开发路径独立推进，而不必复制整个仓库。**
+
+### 1.3 在 VSCode 中创建和切换分支
+
+在 VSCode 中，分支操作集中在**Status Bar 左下角的当前分支名**上：
+
+- 点击分支名，在弹出的下拉列表中选择已有分支，即可切换到该分支。
+- 选择“Create New Branch...”，输入 `feature` 并回车，一步完成“创建 + 切换”。
+
+这里可以解释一个容易被误解的地方：
+
+**创建分支本身不会创建一个新的提交，也不会立即复制一份项目。**
+
+它主要是在 Git 中创建一个新的分支引用。
+
+可以把这看作一个非常轻量的操作。</p></div><div class="bespoke-marp-note" data-index="23" tabindex="0"><p>分支解决了独立开发的问题，但当功能开发完成后，我们往往需要把修改整合起来。
+
+这就引出了 merge。
+
+### 2.1 一个简单的合并场景
+
+假设：
+
+```mermaid
+graph LR
+    A -&gt; B -&gt; C -&gt; D
+    C -&gt; E -&gt; F
+    main([&quot;main&quot;]) -&gt; D
+    feature([&quot;feature&quot;]) -&gt; F
+```
+
+其中：
+
+- `main` 指向 D。
+- `feature` 指向 F。
+- C 是两个分支的共同祖先。
+
+现在你希望把 `feature` 的开发成果合并到 `main`。
+
+Git 会根据提交历史和文件内容来判断如何完成整合。
+
+### 2.2 Fast-forward 与三方合并
+
+可以介绍两种常见情况。
+
+**情况 A：Fast-forward**
+
+假设 `main` 仍然指向 C，而 `feature` 已经前进到 E：
+
+```mermaid
+graph LR
+    A -&gt; B -&gt; C -&gt; D -&gt; E
+    main([&quot;main&quot;]) -&gt; C
+    feature([&quot;feature&quot;]) -&gt; E
+```
+
+当切换到 `main` 并合并 `feature` 时，如果 `main` 没有独立的新提交，Git 可以直接把 `main` 引用移动到 E。
+
+这就是 fast-forward。
+
+它不需要创建新的合并提交。</p></div><div class="bespoke-marp-note" data-index="24" tabindex="0"><p>**情况 B：Three-way merge**
+
+如果 `main` 和 `feature` 都产生了独立提交：
+
+```mermaid
+graph LR
+    A -&gt; B -&gt; C
+    C -&gt; D[&quot;D（main）&quot;]
+    C -&gt; E[&quot;E（feature）&quot;]
+    D -&gt; M[&quot;M（merge commit）&quot;]
+    E -&gt; M
+```
+
+Git 可以使用三个版本进行合并：
+
+1. 共同祖先 C。
+2. `main` 上的版本 D。
+3. `feature` 上的版本 E。
+
+这就是三方合并的基本思路。
+
+Git 不只是把两个文件直接拼在一起，而是利用共同祖先和两个分支的变化来尝试整合修改。</p></div><div class="bespoke-marp-note" data-index="25" tabindex="0"><p>现在假设两个分支都修改了同一个函数：
+
+```python
+def calculate_price(price):
+    return price * 1.0
+```
+
+`main` 修改为：
+
+```python
+def calculate_price(price):
+    return price * 1.1
+```
+
+`feature` 修改为：
+
+```python
+def calculate_price(price):
+    return price * 1.2
+```
+
+Git 无法确定开发者究竟希望采用哪一种业务逻辑。
+
+因此，它可能产生冲突，需要开发者决定最终结果。
+
+关键点是：
+
+**冲突不一定意味着 Git 失效，而可能意味着 Git 缺乏足够的信息来判断开发者的真实意图。**
+
+Git 可以处理大量结构清晰、没有歧义的修改；但它无法仅凭代码差异理解所有业务语义。
+
+### 2.4 冲突是否只会发生在同一行？
+
+不一定。
+
+同一行的不同修改很容易产生冲突，但不同位置的修改也可能发生冲突。
+
+例如：
+
+- 一方删除了某个函数，另一方修改了这个函数。
+- 一方重命名文件，另一方修改了旧文件。
+
+这里可以把冲突理解为：**自动整合无法可靠地确定最终结果，需要人为介入。**</p></div><div class="bespoke-marp-note" data-index="26" tabindex="0"><p>这一部分很适合用来解释 Git 的历史模型有什么实际价值。
+
+学生可能会问：
+
+&gt; 如果我提交了一次错误修改，能不能撤销？
+
+答案是可以，但不同的撤销操作针对的是不同层次。
+
+### 5.1 先区分三个问题
+
+| 问题 | VSCode 中的操作 |
+| --- | --- |
+| 我修改了文件，但还没有暂存，想丢弃这些修改 | Source Control view 中悬停该文件 → 点击 **↩**（Discard Changes） |
+| 我已经暂存了修改，但还没有提交，想取消暂存 | 在“Staged Changes”中点击 **−**（Unstage Changes） |
+| 我刚提交了一次错误修改，想把这次提交收回来 | Source Control view **···** → Commit → **Undo Last Commit** |</p></div><div class="bespoke-marp-note" data-index="27" tabindex="0"><p>对于最后一种情况，VSCode 内置的 **Undo Last Commit** 最适合初学者：它把最近一次提交原样“退回”——提交从历史里消失，改动回到 “Staged Changes” 列表，可以修改后重新提交。
+
+例如，D 是一次错误提交：
+
+```mermaid
+graph LR
+    A -&gt; B -&gt; C -&gt; D[&quot;D（错误提交）&quot;]
+```
+
+执行 **Undo Last Commit** 后，D 从历史中收回，历史回到 C；D 的改动完好地待在 “Staged Changes” 里等你处理：
+
+```mermaid
+graph LR
+    A -&gt; B -&gt; C
+```
+
+一句话：**撤销提交不等于丢改动——只是把“提交”这层包装退掉，内容回到暂存区。**
+
+需要提醒边界：Undo Last Commit 只收回**最近一次**提交，最适合还没有 push 的场景。已经 push 的提交技术上也能收回——但改写完再推送需要 **force push**（带 `--force` 的推送），会打乱基于旧历史协作的人，初学阶段不推荐；用一次新的提交去修正错误更稳妥。
+
+### 5.2 那更早的、已经推送的提交呢？
+
+可以简单提及，不必展开操作细节。
+
+- 更早的错误提交：用**新的提交**把改错的内容改回来，不改写历史。
+- 背后更精细的工具（revert、reset 等）这节课不展开，以后需要时再学。
+
+&gt; 一条够用的规则：**没推送的提交可以随意收回；已推送的提交也能改，但再次推送要加 `--force`（force push），会影响他人协作——不推荐。**（VS Code 里如何开启 force push，见文末附录。）</p></div><div class="bespoke-marp-note" data-index="28" tabindex="0"><p>这一部分是从本地 Git 过渡到 GitHub 的关键。
+
+先提出一个问题：
+
+&gt; 如果 Git 已经能在本地保存历史，为什么还需要 GitHub？
+
+### 3.1 Git 和 GitHub 不是同一个东西
+
+可以先给出一个简单对比：
+
+| Git | GitHub |
+| --- | --- |
+| 一个版本控制系统 | 一个提供 Git 仓库托管等服务的平台 |
+| 可以在本地运行 | 可以托管远程仓库 |
+| 可以记录提交、管理分支、整合历史 | 可以保存远程仓库，便于跨设备或多人共享 |
+| 不要求必须使用 GitHub | 可以托管 Git 仓库，但不等于 Git 本身 |
+
+例如，你完全可以在没有网络的情况下，只用 VSCode 完成：
+
+1. 打开 Source Control view，点击“Initialize Repository”按钮，在当前文件夹创建仓库。
+2. 在 Source Control view 点击“Changes”标题栏的 **+**（Stage All Changes）。
+3. 输入提交信息 `Initial commit`，点击 **✓ Commit** 提交。
+
+这些操作不需要 GitHub。
+
+因此，GitHub 不是 Git 的必要组成部分。</p></div><div class="bespoke-marp-note" data-index="29" tabindex="0"><p>看一个具体场景。假设有两名开发者：
+
+```mermaid
+graph TD
+    A[&quot;Developer A&lt;br&gt;Local Repository&quot;]
+    GH[&quot;GitHub&quot;]
+    B[&quot;Developer B&lt;br&gt;Local Repository&quot;]
+    A &lt;-&gt; GH
+    GH &lt;-&gt; B
+```
+
+A 和 B 都可以在本地创建提交、查看历史、切换分支——哪怕此刻完全没有网络。
+
+为什么做得到？关键区别是：**每个正常克隆得到的仓库都自带完整的提交历史，而不只是文件的一份副本。** 他们各自手里都有一个功能完整的仓库。
+
+这也正好回答了第一节埋下的问题：Git 和更早的 SVN 有什么区别？
+
+| | SVN（集中式） | Git（分布式） |
+| --- | --- | --- |
+| 历史存在哪里 | 只在中央服务器 | 每个克隆都有完整历史 |
+| 提交需要联网吗 | 必须连着中央服务器 | 不需要，本地随时提交 |
+| 中央服务器宕机 | 所有人无法提交、无法协作 | 每人手里仍有完整仓库，之后随便挑一份同步 |
+| 典型协作方式 | 围绕中央仓库转 | 任意仓库互相同步，GitHub 是最流行的“汇合点” |
+
+一句话：**SVN 的提交和历史都在中央服务器上——连不上它（服务器挂了，或者你人在飞机上），就提交不了、也查不了历史；Git 的完整历史就在你手里——飞机上照样提交。**（较真备注一：SVN 离线时编辑文件、对比改动、恢复单个文件仍然可行，这些只依赖本地工作副本；离不开服务器的是 commit、update、log、branch 等关键操作。较真备注二：浅克隆等特殊配置下 Git 本地不一定有全部历史，这里按普通完整克隆讨论。）</p></div><div class="bespoke-marp-note" data-index="30" tabindex="0"><p>本地有了完整历史之后，新需求出现了：把提交发布到 GitHub，或者拿到别人的更新。这要求本地仓库先记住“要打交道的远程仓库是谁、地址是什么、给它叫什么名字”。
+
+这就是 remote：一条命名的远程仓库连接配置。
+
+这些都会在结课练习（Part 7）里亲眼看到：clone 时 Git 自动把来源仓库配置为名为 `origin` 的 remote；选择 fork 推送时，VS Code 又自动把你自己 GitHub 账号下的仓库关联了进来——全程没有一步手动的“配置远程”操作。
+
+这里要强调：
+
+**`origin` 只是一个常见的默认名称，不是 GitHub 的特殊关键字。**
+
+一个 remote 可以关联到 GitHub，也可以关联到公司内部的 Git 服务器，甚至是另一台电脑上的仓库。</p></div><div class="bespoke-marp-note" data-index="31" tabindex="0"><p>我建议把它讲成三个先后出现的问题，而不是让学生死记操作：
+
+1. 我在本地完成了提交，怎么发布出去？（push）
+2. 远程有没有别人的新提交？（fetch）
+3. 远程更新拿到后，怎么整合进当前分支？（pull）
+
+### 4.1 Push：把本地提交发布到远程仓库
+
+第一个问题：我在本地完成了一些提交，怎么让别人、让 GitHub 也看到？
+
+在 VSCode 中：第一次推送时，点击 Status Bar 的“Publish Branch”；之后可以点击 “Sync Changes”，或通过 Source Control view **···** → “Pull, Push” → “Push”。
+
+概念上，它会将远程仓库尚未拥有的必要 Git 对象传过去，并更新远程引用，但具体更新还会受到目标分支、权限和服务器规则等因素影响。
+
+如果推送被拒绝、而你确实需要覆盖远程历史（例如自己整理过提交），参见文末附录《在 VSCode 中允许 Force Push》。</p></div><div class="bespoke-marp-note" data-index="32" tabindex="0"><p>第二个问题：别人可能已经往远程推送了新提交，我怎么知道？
+
+在 VSCode 中：Source Control view **···** → “Pull, Push” → “Fetch”。
+
+它会获取远程的新提交和相关对象，并更新相应的远程跟踪引用。
+
+例如：
+
+```mermaid
+graph LR
+    om([&quot;origin/main&quot;]) -&gt; D[&quot;Commit D&quot;]
+    main([&quot;main&quot;]) -&gt; C[&quot;Commit C&quot;]
+```
+
+执行抓取后，Git 可能发现远程 `main` 已经前进到 D。
+
+此时，本地的 `origin/main` 会更新到 D，但本地 `main` 不会因此自动移动。
+
+这说明：
+
+**获取远程更新，不等于把远程更新直接整合进当前工作分支。**</p></div><div class="bespoke-marp-note" data-index="33" tabindex="0"><p>第三个问题：远程的更新拿到了，怎么把它整合进我当前的工作分支？
+
+在 VSCode 中：Source Control view **···** → “Pull”，或直接点击“Sync Changes”按钮（一次完成拉取 + 推送）。
+
+在常见配置下，拉取可以理解为：
+
+```text
+抓取（fetch） + 整合（integrate）
+```
+
+后半部分通常是 merge，也可以根据配置使用 rebase。
+
+例如：
+
+```mermaid
+graph LR
+    A -&gt; B -&gt; C[&quot;C（本地 main）&quot;]
+    B -&gt; D[&quot;D（远程 main）&quot;]
+```
+
+执行拉取后，Git 会先获取远程更新，再按照配置尝试整合远程历史。
+
+如果本地没有独立的新提交，可能只是 fast-forward。
+
+如果本地和远程分别产生了提交，则可能需要 merge 或 rebase。</p></div><div class="bespoke-marp-note" data-index="34" tabindex="0"><p>上面说的是“本地多了几个提交”，还有第三种更常见的情况：远程有更新要拉，而你桌面上**还摊着一叠没提交的修改**——改到一半的代码、临时调试的打印。这时直接 Pull，Git 可能直接拒绝：同一个文件两边都动过，它不敢硬叠。
+
+用搬箱子类比：
+
+- 本地仓库是一摞**已经封好的箱子**（提交）；远程寄来了新箱子，要叠到你这摞上（pull）。
+- 可你的箱子上还摊着**一叠没打包的衣服**（未提交的修改）——新箱子没地方放。
+- **Stash** 就是那块“临时防尘布”：先把这叠衣服整个收起来放到一边（存入 stash），桌面瞬间干净。
+- 叠好远程来的新箱子（pull）之后，再把衣服**原样倒回**桌上（stash pop）——接着干活，什么都没丢。
+
+VSCode 操作：
+
+1. Source Control view **···** → Stash → **Stash**（或 **Stash (Include Untracked)**，把新建但未跟踪的文件也一起收走）；备注一句更好认，如 `wip: 登录页改到一半`。
+2. 正常 Pull。
+3. **···** → Stash → **Pop Latest Stash**——修改回到工作区，stash 条目同时清掉（用 **Apply Latest Stash** 则保留备份）。
+
+一句话：**stash = 把没打包的修改整叠收起来，腾出桌面处理远程更新，完事再原样放回。**
+
+边界提醒（点到为止）：stash 是临时存放处，不是第二个暂存区——别把重要工作长期留在里面；放回时如果和拉下来的修改改到了同一处，照样走 Part 2 学过的冲突流程。</p></div><div class="bespoke-marp-note" data-index="35" tabindex="0"><p>最后用一张图将整门课的内容串起来。
+
+可以用以下流程总结：
+
+```mermaid
+flowchart TD
+    EF[&quot;Edit Files&quot;] -&gt; WT[&quot;Working Tree&quot;]
+    WT -&gt;|&quot;Stage（Source Control view +）&quot;| SA[&quot;Staging Area&quot;]
+    SA -&gt;|&quot;Commit（消息框 + ✓）&quot;| LR[&quot;Local Repository&quot;]
+    LR -&gt; BR[&quot;Branch&quot;]
+    LR -&gt; HIS[&quot;History&quot;]
+    LR -&gt; MG[&quot;Merge&quot;]
+    LR -&gt; RV[&quot;Undo Last Commit&quot;]
+    LR -&gt;|&quot;Push / Fetch / Pull（··· → 拉取、推送）&quot;| RR[&quot;Remote Repository&quot;]
+```
+
+最后强调三点：
+
+1. **Git 的核心是管理历史。** 文件是工作对象，提交和提交之间的关系构成了历史。
+2. **Git 的分支是轻量的历史引用。** 它使不同的开发路径可以独立推进，再通过合并整合。
+3. **Git 是分布式的。** GitHub 提供远程仓库托管和共享能力，但 Git 本身就可以在本地独立工作。</p></div><div class="bespoke-marp-note" data-index="36" tabindex="0"><p>课程的最后一件事：把今天学到的整条链路亲手走一遍——把**本课程的内容仓库**变成你 GitHub 主页上的一个仓库。
+
+1. **Clone**——打开 Command Palette（Windows：`Ctrl+Shift+P`，macOS：`Cmd+Shift+P`），输入 “Git: Clone”，粘贴仓库地址 `https://github.com/CompPsyUnion/2627-weekly-session.git`，选择本地存放位置，VS Code 会完成克隆并提示打开。此时 Git 已自动把来源仓库配置为名为 `origin` 的 remote。
+2. **改动并提交**——在仓库里做一个小改动（例如在任意 Markdown 文件里加一行自己的名字），在 Source Control view 中暂存并提交。
+3. **Push**——点击 “Sync Changes”（或 **···** → “Push”）。你并没有原仓库的写权限，VS Code 会提示没有推送权限、询问是否创建 fork——点击 **Create Fork**。VS Code 会在你的 GitHub 账号下自动创建 fork 并完成推送。
+4. **验收**——打开浏览器访问 `github.com/&lt;你的用户名&gt;`，在仓库列表里找到 `2627-weekly-session`，确认刚才的提交已经出现在你自己的仓库里。
+
+如果还没登录 GitHub（Session 1 动手环节没完成的同学），推送时 VS Code 会先弹出浏览器要求授权，照做即可。
+
+这条链路——clone → 改动 → commit → fork → push——正是向开源项目提交贡献的标准入口，仓库的 CONTRIBUTING.md 描述的就是这套流程。课程到这里正好闭环：Session 1 的第一次提交留在你自己的电脑上，最后这次提交去了你自己的 GitHub。</p></div><script>/*!! License: https://unpkg.com/@marp-team/marp-cli@4.2.3/lib/bespoke.js.LICENSE.txt */
+!function(){"use strict";function e(e){return e&&e.__esModule&&Object.prototype.hasOwnProperty.call(e,"default")?e.default:e}var t,n,r=(n||(n=1,t={from:function(e,t){var n,r=1===(e.parent||e).nodeType?e.parent||e:document.querySelector(e.parent||e),o=[].filter.call("string"==typeof e.slides?r.querySelectorAll(e.slides):e.slides||r.children,function(e){return"SCRIPT"!==e.nodeName}),a={},i=function(e,t){return(t=t||{}).index=o.indexOf(e),t.slide=e,t},s=function(e,t){a[e]=(a[e]||[]).filter(function(e){return e!==t})},c=function(e,t){return(a[e]||[]).reduce(function(e,n){return e&&!1!==n(t)},!0)},l=function(e,t){o[e]&&(n&&c("deactivate",i(n,t)),n=o[e],c("activate",i(n,t)))},d=function(e,t){var r=o.indexOf(n)+e;c(e>0?"next":"prev",i(n,t))&&l(r,t)},u={off:s,on:function(e,t){return(a[e]||(a[e]=[])).push(t),s.bind(null,e,t)},fire:c,slide:function(e,t){if(!arguments.length)return o.indexOf(n);c("slide",i(o[e],t))&&l(e,t)},next:d.bind(null,1),prev:d.bind(null,-1),parent:r,slides:o,destroy:function(e){c("destroy",i(n,e)),a={}}};return(t||[]).forEach(function(e){e(u)}),n||l(0),u}}),t),o=e(r);const a=document.body,i=(...e)=>history.replaceState(...e),s="",c="presenter",l="next",d=["",c,l],u="bespoke-marp-",f=`data-${u}`,m=(e,{protocol:t,host:n,pathname:r,hash:o}=location)=>{const a=e.toString();return`${t}//${n}${r}${a?"?":""}${a}${o}`},g=()=>a.dataset.bespokeView,p=e=>new URLSearchParams(location.search).get(e),v=(e,t={})=>{const n={location,setter:i,...t},r=new URLSearchParams(n.location.search);for(const t of Object.keys(e)){const n=e[t];"string"==typeof n?r.set(t,n):r.delete(t)}try{n.setter({...window.history.state??{}},"",m(r,n.location))}catch(e){console.error(e)}},h=(()=>{const e="bespoke-marp";try{return localStorage.setItem(e,e),localStorage.removeItem(e),!0}catch{return!1}})(),y=e=>{try{return localStorage.getItem(e)}catch{return null}},b=(e,t)=>{try{return localStorage.setItem(e,t),!0}catch{return!1}},w=e=>{try{return localStorage.removeItem(e),!0}catch{return!1}},x=(e,t)=>{const n="aria-hidden";t?e.setAttribute(n,"true"):e.removeAttribute(n)},k=e=>{e.parent.classList.add(`${u}parent`),e.slides.forEach(e=>e.classList.add(`${u}slide`)),e.on("activate",t=>{const n=`${u}active`,r=t.slide,o=r.classList,a=!o.contains(n);if(e.slides.forEach(e=>{e.classList.remove(n),x(e,!0)}),o.add(n),x(r,!1),a){const e=`${n}-ready`;o.add(e),document.body.clientHeight,o.remove(e)}})},$=e=>{let t=0,n=0;Object.defineProperty(e,"fragments",{enumerable:!0,value:e.slides.map(e=>[null,...e.querySelectorAll("[data-marpit-fragment]")])});const r=r=>void 0!==e.fragments[t][n+r],o=(r,o)=>{t=r,n=o,e.fragments.forEach((e,t)=>{e.forEach((e,n)=>{if(null==e)return;const a=t<r||t===r&&n<=o;e.setAttribute(`${f}fragment`,(a?"":"in")+"active");const i=`${f}current-fragment`;t===r&&n===o?e.setAttribute(i,"current"):e.removeAttribute(i)})}),e.fragmentIndex=o;const a={slide:e.slides[r],index:r,fragments:e.fragments[r],fragmentIndex:o};e.fire("fragment",a)};e.on("next",({fragment:a=!0})=>{if(a){if(r(1))return o(t,n+1),!1;const a=t+1;e.fragments[a]&&o(a,0)}else{const r=e.fragments[t].length;if(n+1<r)return o(t,r-1),!1;const a=e.fragments[t+1];a&&o(t+1,a.length-1)}}),e.on("prev",({fragment:a=!0})=>{if(r(-1)&&a)return o(t,n-1),!1;const i=t-1;e.fragments[i]&&o(i,e.fragments[i].length-1)}),e.on("slide",({index:t,fragment:n})=>{let r=0;if(void 0!==n){const o=e.fragments[t];if(o){const{length:e}=o;r=-1===n?e-1:Math.min(Math.max(n,0),e-1)}}o(t,r)}),o(0,0)},E=document,L=()=>!(!E.fullscreenEnabled&&!E.webkitFullscreenEnabled),S=()=>!(!E.fullscreenElement&&!E.webkitFullscreenElement),P=e=>{e.fullscreen=()=>{L()&&(async()=>{S()?(E.exitFullscreen||E.webkitExitFullscreen)?.call(E):((e=E.body)=>{(e.requestFullscreen||e.webkitRequestFullscreen)?.call(e)})()})()},document.addEventListener("keydown",t=>{"f"!==t.key&&"F11"!==t.key||t.altKey||t.ctrlKey||t.metaKey||!L()||(e.fullscreen(),t.preventDefault())})},_=`${u}inactive`,T=(e=2e3)=>({parent:t,fire:n})=>{const r=t.classList,o=e=>n(`marp-${e?"":"in"}active`);let a;const i=()=>{a&&clearTimeout(a),a=setTimeout(()=>{r.add(_),o()},e),r.contains(_)&&(r.remove(_),o(!0))};for(const e of["mousedown","mousemove","touchend"])document.addEventListener(e,i);setTimeout(i,0)},I=["AUDIO","BUTTON","INPUT","SELECT","TEXTAREA","VIDEO"],M=e=>{e.parent.addEventListener("keydown",e=>{if(!e.target)return;const t=e.target;(I.includes(t.nodeName)||"true"===t.contentEditable)&&e.stopPropagation()})},O=e=>{window.addEventListener("load",()=>{for(const t of e.slides){const e=t.querySelector("marp-auto-scaling, [data-auto-scaling], [data-marp-fitting]");t.setAttribute(`${f}load`,e?"":"hideable")}})},A=({interval:e=250}={})=>t=>{document.addEventListener("keydown",e=>{if(" "===e.key&&e.shiftKey)t.prev();else if("ArrowLeft"===e.key||"ArrowUp"===e.key||"PageUp"===e.key)t.prev({fragment:!e.shiftKey});else if(" "!==e.key||e.shiftKey)if("ArrowRight"===e.key||"ArrowDown"===e.key||"PageDown"===e.key)t.next({fragment:!e.shiftKey});else if("End"===e.key)t.slide(t.slides.length-1,{fragment:-1});else{if("Home"!==e.key)return;t.slide(0)}else t.next();e.preventDefault()});let n,r,o=0;t.parent.addEventListener("wheel",a=>{let i=!1;const s=(e,t)=>{e&&(i=i||((e,t)=>((e,t)=>{const n="X"===t?"Width":"Height";return e[`client${n}`]<e[`scroll${n}`]})(e,t)&&((e,t)=>{const{overflow:n}=e,r=e[`overflow${t}`];return"auto"===n||"scroll"===n||"auto"===r||"scroll"===r})(getComputedStyle(e),t))(e,t)),e?.parentElement&&s(e.parentElement,t)};if(0!==a.deltaX&&s(a.target,"X"),0!==a.deltaY&&s(a.target,"Y"),i)return;a.preventDefault();const c=Math.sqrt(a.deltaX**2+a.deltaY**2);if(void 0!==a.wheelDelta){if(void 0===a.webkitForce&&Math.abs(a.wheelDelta)<40)return;if(a.deltaMode===a.DOM_DELTA_PIXEL&&c<4)return}else if(a.deltaMode===a.DOM_DELTA_PIXEL&&c<12)return;r&&clearTimeout(r),r=setTimeout(()=>{n=0},e);const l=Date.now()-o<e,d=c<=n;if(n=c,l||d)return;let u;(a.deltaX>0||a.deltaY>0)&&(u="next"),(a.deltaX<0||a.deltaY<0)&&(u="prev"),u&&(t[u](),o=Date.now())})},C=(e=`.${u}osc`)=>{const t=document.querySelector(e);if(!t)return()=>{};const n=(e,n)=>{t.querySelectorAll(`[${f}osc=${JSON.stringify(e)}]`).forEach(n)};return L()||n("fullscreen",e=>e.style.display="none"),h||n("presenter",e=>{e.disabled=!0,e.title="Presenter view is disabled due to restricted localStorage."}),e=>{t.addEventListener("click",t=>{if(t.target instanceof HTMLElement){const{bespokeMarpOsc:n}=t.target.dataset;n&&t.target.blur();const r={fragment:!t.shiftKey};"next"===n?e.next(r):"prev"===n?e.prev(r):"fullscreen"===n?e?.fullscreen():"presenter"===n&&e.openPresenterView()}}),e.parent.appendChild(t),e.on("activate",({index:t})=>{n("page",n=>n.textContent=`Page ${t+1} of ${e.slides.length}`)}),e.on("fragment",({index:t,fragments:r,fragmentIndex:o})=>{n("prev",e=>e.disabled=0===t&&0===o),n("next",n=>n.disabled=t===e.slides.length-1&&o===r.length-1)}),e.on("marp-active",()=>x(t,!1)),e.on("marp-inactive",()=>x(t,!0)),L()&&(e=>{for(const t of["","webkit"])E.addEventListener(t+"fullscreenchange",e)})(()=>n("fullscreen",e=>e.classList.toggle("exit",L()&&S())))}},D=e=>{window.addEventListener("message",t=>{if(t.origin!==window.origin)return;const[n,r]=t.data.split(":");if("navigate"===n){const[t,n]=r.split(",");let o=Number.parseInt(t,10),a=Number.parseInt(n,10)+1;a>=e.fragments[o].length&&(o+=1,a=0),e.slide(o,{fragment:a})}})};var N,B,q,K,F,j,V,U={exports:{}},X=(N||(N=1,U.exports=(B=["area","base","br","col","command","embed","hr","img","input","keygen","link","meta","param","source","track","wbr"],q=function(e){return String(e).replace(/[&<>"']/g,function(e){return"&"+K[e]+";"})},K={"&":"amp","<":"lt",">":"gt",'"':"quot","'":"apos"},F="dangerouslySetInnerHTML",j={className:"class",htmlFor:"for"},V={},function(e,t){var n=[],r="";t=t||{};for(var o=arguments.length;o-- >2;)n.push(arguments[o]);if("function"==typeof e)return t.children=n.reverse(),e(t);if(e){if(r+="<"+e,t)for(var a in t)!1!==t[a]&&null!=t[a]&&a!==F&&(r+=" "+(j[a]?j[a]:q(a))+'="'+q(t[a])+'"');r+=">"}if(-1===B.indexOf(e)){if(t[F])r+=t[F].__html;else for(;n.length;){var i=n.pop();if(i)if(i.pop)for(var s=i.length;s--;)n.push(i[s]);else r+=!0===V[i]?i:q(i)}r+=e?"</"+e+">":""}return V[r]=!0,r})),U.exports),H=e(X);const R=({children:e})=>H(null,null,...e),W=`${u}presenter-`,J={container:`${W}container`,dragbar:`${W}dragbar-container`,next:`${W}next`,nextContainer:`${W}next-container`,noteContainer:`${W}note-container`,noteWrapper:`${W}note-wrapper`,noteButtons:`${W}note-buttons`,infoContainer:`${W}info-container`,infoPage:`${W}info-page`,infoPageText:`${W}info-page-text`,infoPagePrev:`${W}info-page-prev`,infoPageNext:`${W}info-page-next`,noteButtonsBigger:`${W}note-bigger`,noteButtonsSmaller:`${W}note-smaller`,infoTime:`${W}info-time`,infoTimer:`${W}info-timer`},Y=e=>{const{title:t}=document;document.title="[Presenter view]"+(t?` - ${t}`:"");const n={},r=e=>(n[e]=n[e]||document.querySelector(`.${e}`),n[e]);document.body.appendChild((e=>{const t=document.createElement("div");return t.className=J.container,t.appendChild(e),t.insertAdjacentHTML("beforeend",H(R,null,H("div",{class:J.nextContainer},H("iframe",{class:J.next,src:"?view=next"})),H("div",{class:J.dragbar}),H("div",{class:J.noteContainer},H("div",{class:J.noteWrapper}),H("div",{class:J.noteButtons},H("button",{class:J.noteButtonsSmaller,tabindex:"-1",title:"Smaller notes font size"},"Smaller notes font size"),H("button",{class:J.noteButtonsBigger,tabindex:"-1",title:"Bigger notes font size"},"Bigger notes font size"))),H("div",{class:J.infoContainer},H("div",{class:J.infoPage},H("button",{class:J.infoPagePrev,tabindex:"-1",title:"Previous"},"Previous"),H("span",{class:J.infoPageText}),H("button",{class:J.infoPageNext,tabindex:"-1",title:"Next"},"Next")),H("time",{class:J.infoTime,title:"Current time"}),H("time",{class:J.infoTimer,title:"Timer"})))),t})(e.parent)),(e=>{let t=!1;r(J.dragbar).addEventListener("mousedown",()=>{t=!0,r(J.dragbar).classList.add("active")}),window.addEventListener("mouseup",()=>{t=!1,r(J.dragbar).classList.remove("active")}),window.addEventListener("mousemove",e=>{if(!t)return;const n=e.clientX/document.documentElement.clientWidth*100;r(J.container).style.setProperty("--bespoke-marp-presenter-split-ratio",`${Math.max(0,Math.min(100,n))}%`)}),r(J.nextContainer).addEventListener("click",()=>e.next());const n=r(J.next),o=(a=n,(e,t)=>a.contentWindow?.postMessage(`navigate:${e},${t}`,"null"===window.origin?"*":window.origin));var a;n.addEventListener("load",()=>{r(J.nextContainer).classList.add("active"),o(e.slide(),e.fragmentIndex),e.on("fragment",({index:e,fragmentIndex:t})=>o(e,t))});const i=document.querySelectorAll(".bespoke-marp-note");i.forEach(e=>{e.addEventListener("keydown",e=>e.stopPropagation()),r(J.noteWrapper).appendChild(e)}),e.on("activate",()=>i.forEach(t=>t.classList.toggle("active",t.dataset.index==e.slide())));let s=0;const c=e=>{s=Math.max(-5,s+e),r(J.noteContainer).style.setProperty("--bespoke-marp-note-font-scale",(1.2**s).toFixed(4))},l=()=>c(1),d=()=>c(-1),u=r(J.noteButtonsBigger),f=r(J.noteButtonsSmaller);u.addEventListener("click",()=>{u.blur(),l()}),f.addEventListener("click",()=>{f.blur(),d()}),document.addEventListener("keydown",e=>{"+"===e.key&&l(),"-"===e.key&&d()},!0),e.on("activate",({index:t})=>{r(J.infoPageText).textContent=`${t+1} / ${e.slides.length}`});const m=r(J.infoPagePrev),g=r(J.infoPageNext);m.addEventListener("click",t=>{m.blur(),e.prev({fragment:!t.shiftKey})}),g.addEventListener("click",t=>{g.blur(),e.next({fragment:!t.shiftKey})}),e.on("fragment",({index:t,fragments:n,fragmentIndex:r})=>{m.disabled=0===t&&0===r,g.disabled=t===e.slides.length-1&&r===n.length-1});let p=new Date;const v=()=>{const e=new Date,t=e=>`${Math.floor(e)}`.padStart(2,"0"),n=e.getTime()-p.getTime(),o=t(n/1e3%60),a=t(n/1e3/60%60),i=t(n/36e5%24);r(J.infoTime).textContent=e.toLocaleTimeString(),r(J.infoTimer).textContent=`${i}:${a}:${o}`};v(),setInterval(v,250),r(J.infoTimer).addEventListener("click",()=>{p=new Date})})(e)},z=e=>{if(!(e=>e.syncKey&&"string"==typeof e.syncKey)(e))throw new Error("The current instance of Bespoke.js is invalid for Marp bespoke presenter plugin.");Object.defineProperties(e,{openPresenterView:{enumerable:!0,value:G},presenterUrl:{enumerable:!0,get:Q}}),h&&document.addEventListener("keydown",t=>{"p"!==t.key||t.altKey||t.ctrlKey||t.metaKey||(t.preventDefault(),e.openPresenterView())})};function G(){const{max:e,floor:t}=Math,n=e(t(.85*window.innerWidth),640),r=e(t(.85*window.innerHeight),360);return window.open(this.presenterUrl,W+this.syncKey,`width=${n},height=${r},menubar=no,toolbar=no`)}function Q(){const e=new URLSearchParams(location.search);return e.set("view","presenter"),e.set("sync",this.syncKey),m(e)}const Z=e=>{const t=g();return t===l&&e.appendChild(document.createElement("span")),{[s]:z,[c]:Y,[l]:D}[t]},ee=e=>{e.on("activate",t=>{document.querySelectorAll(".bespoke-progress-parent > .bespoke-progress-bar").forEach(n=>{n.style.flexBasis=100*t.index/(e.slides.length-1)+"%"})})},te=e=>{const t=Number.parseInt(e,10);return Number.isNaN(t)?null:t},ne=(e={})=>{const t={history:!0,...e};return e=>{let n=!0;const r=e=>{const t=n;try{return n=!0,e()}finally{n=t}},o=(t={fragment:!0})=>{let n=t.fragment?te(p("f")||""):null;((t,n)=>{const{min:r,max:o}=Math,{fragments:a,slides:i}=e,s=o(0,r(t,i.length-1)),c=o(0,r(n||0,a[s].length-1));s===e.slide()&&c===e.fragmentIndex||e.slide(s,{fragment:c})})((()=>{if(location.hash){const[t]=location.hash.slice(1).split(":~:");if(/^\d+$/.test(t))return(te(t)??1)-1;const r=document.getElementById(t)||document.querySelector(`a[name="${CSS.escape(t)}"]`);if(r){const{length:t}=e.slides;for(let o=0;o<t;o+=1)if(e.slides[o].contains(r)){const t=e.fragments?.[o],a=r.closest("[data-marpit-fragment]");if(t&&a){const e=t.indexOf(a);e>=0&&(n=e)}return o}}}return 0})(),n)};e.on("fragment",({index:e,fragmentIndex:r})=>{n||v({f:0===r||r.toString()},{location:{...location,hash:`#${e+1}`},setter:(...e)=>t.history?history.pushState(...e):history.replaceState(...e)})}),setTimeout(()=>{o(),window.addEventListener("hashchange",()=>r(()=>{o({fragment:!1}),v({f:void 0})})),window.addEventListener("popstate",()=>{n||r(()=>o())}),n=!1},0)}},re=(e={})=>{const t=e.key||window.history.state?.marpBespokeSyncKey||Math.random().toString(36).slice(2),n=`bespoke-marp-sync-${t}`;var r;r={marpBespokeSyncKey:t},v({},{setter:(e,...t)=>i({...e,...r},...t)});const o=()=>{const e=y(n);return e?JSON.parse(e):Object.create(null)},a=e=>{const t=o(),r={...t,...e(t)};return b(n,JSON.stringify(r)),r},s=()=>{window.removeEventListener("pageshow",s),a(e=>({reference:(e.reference||0)+1}))};return e=>{s(),Object.defineProperty(e,"syncKey",{value:t,enumerable:!0});let r=!0;setTimeout(()=>{e.on("fragment",e=>{r&&a(()=>({index:e.index,fragmentIndex:e.fragmentIndex}))})},0),window.addEventListener("storage",t=>{if(t.key===n&&t.oldValue&&t.newValue){const n=JSON.parse(t.oldValue),o=JSON.parse(t.newValue);if(n.index!==o.index||n.fragmentIndex!==o.fragmentIndex)try{r=!1,e.slide(o.index,{fragment:o.fragmentIndex,forSync:!0})}finally{r=!0}}});const i=()=>{const{reference:e}=o();void 0===e||e<=1?w(n):a(()=>({reference:e-1}))};window.addEventListener("pagehide",e=>{e.persisted&&window.addEventListener("pageshow",s),i()}),e.on("destroy",i)}},{PI:oe,abs:ae,sqrt:ie,atan2:se}=Math,ce={passive:!0},le=({slope:e=-.7,swipeThreshold:t=30}={})=>n=>{let r;const o=n.parent,a=e=>{const t=o.getBoundingClientRect();return{x:e.pageX-(t.left+t.right)/2,y:e.pageY-(t.top+t.bottom)/2}};o.addEventListener("touchstart",({touches:e})=>{r=1===e.length?a(e[0]):void 0},ce),o.addEventListener("touchmove",e=>{if(r)if(1===e.touches.length){e.preventDefault();const t=a(e.touches[0]),n=t.x-r.x,o=t.y-r.y;r.delta=ie(ae(n)**2+ae(o)**2),r.radian=se(n,o)}else r=void 0}),o.addEventListener("touchend",o=>{if(r){if(r.delta&&r.delta>=t&&r.radian){const t=(r.radian-e+oe)%(2*oe)-oe;n[t<0?"next":"prev"](),o.stopPropagation()}r=void 0}},ce)},de=new Map;de.clear(),de.set("none",{backward:{both:void 0,incoming:void 0,outgoing:void 0},forward:{both:void 0,incoming:void 0,outgoing:void 0}});const ue={both:"",outgoing:"outgoing-",incoming:"incoming-"},fe={forward:"",backward:"-backward"},me=e=>`--marp-bespoke-transition-animation-${e}`,ge=e=>`--marp-transition-${e}`,pe=me("name"),ve=me("duration"),he=e=>new Promise(t=>{const n={},r=document.createElement("div"),o=e=>{r.remove(),t(e)};r.addEventListener("animationstart",()=>o(n)),Object.assign(r.style,{animationName:e,animationDuration:"1s",animationFillMode:"both",animationPlayState:"paused",position:"absolute",pointerEvents:"none"}),document.body.appendChild(r);const a=getComputedStyle(r).getPropertyValue(ge("duration"));a&&Number.parseFloat(a)>=0&&(n.defaultDuration=a),((e,t)=>{requestAnimationFrame(()=>{e.style.animationPlayState="running",requestAnimationFrame(()=>t(void 0))})})(r,o)}),ye=async e=>de.has(e)?de.get(e):(e=>{const t={},n=[];for(const[r,o]of Object.entries(ue))for(const[a,i]of Object.entries(fe)){const s=`marp-${o}transition${i}-${e}`;n.push(he(s).then(e=>{t[a]=t[a]||{},t[a][r]=e?{...e,name:s}:void 0}))}return Promise.all(n).then(()=>t)})(e).then(t=>(de.set(e,t),t)),be=e=>Object.values(e).flatMap(Object.values).every(e=>!e),we=(e,{type:t,backward:n})=>{const r=e[n?"backward":"forward"],o=(()=>{const e=r[t],n=e=>({[pe]:e.name});if(e)return n(e);if(r.both){const e=n(r.both);return"incoming"===t&&(e[me("direction")]="reverse"),e}})();return!o&&n?we(e,{type:t,backward:!1}):o||{[pe]:"__bespoke_marp_transition_no_animation__"}},xe=e=>{if(e)try{const t=JSON.parse(e);if((e=>{if("object"!=typeof e)return!1;const t=e;return"string"==typeof t.name&&(void 0===t.duration||"string"==typeof t.duration)})(t))return t}catch{}},ke="_tSId",$e="_tA",Ee="bespoke-marp-transition-warming-up",Le=window.matchMedia("(prefers-reduced-motion: reduce)"),Se="__bespoke_marp_transition_reduced_outgoing__",Pe="__bespoke_marp_transition_reduced_incoming__",_e={forward:{both:void 0,incoming:{name:Pe},outgoing:{name:Se}},backward:{both:void 0,incoming:{name:Pe},outgoing:{name:Se}}},Te=e=>{if(!document.startViewTransition)return;const t=t=>(void 0!==t&&(e._tD=t),e._tD);let n;t(!1),((...e)=>{CSS.registerProperty({name:ge("duration"),syntax:"<time>",inherits:!0,initialValue:"-1s"});const t=[...new Set(e).values()];return Promise.all(t.map(e=>ye(e))).then()})(...Array.from(document.querySelectorAll("section[data-transition], section[data-transition-back]")).flatMap(e=>[e.dataset.transition,e.dataset.transitionBack].flatMap(e=>{const t=xe(e);return[t?.name,t?.builtinFallback?`__builtin__${t.name}`:void 0]}).filter(e=>!!e))).then(()=>{document.querySelectorAll("style").forEach(e=>{e.innerHTML=e.innerHTML.replace(/--marp-transition-duration:[^;}]*[;}]/g,e=>e.slice(0,-1)+"!important"+e.slice(-1))})});const r=(n,{back:r,cond:o})=>a=>{const i=t();if(i)return!!a[$e]||!("object"!=typeof i||(i.skipTransition(),!a.forSync));if(!o(a))return!0;const s=e.slides[e.slide()],c=()=>a.back??r,l="data-transition"+(c()?"-back":""),d=s.querySelector(`section[${l}]`);if(!d)return!0;const u=xe(d.getAttribute(l)??void 0);return!u||((async(e,{builtinFallback:t=!0}={})=>{let n=await ye(e);if(be(n)){if(!t)return;return n=await ye(`__builtin__${e}`),be(n)?void 0:n}return n})(u.name,{builtinFallback:u.builtinFallback}).then(e=>{if(!e){t(!0);try{n(a)}finally{t(!1)}return}let r=e;Le.matches&&(console.warn("Use a constant animation to transition because preferring reduced motion by viewer has detected."),r=_e);const o=document.getElementById(ke);o&&o.remove();const i=document.createElement("style");i.id=ke,document.head.appendChild(i),((e,t)=>{const n=[`:root{${ge("direction")}:${t.backward?-1:1};}`,":root:has(.bespoke-marp-inactive){cursor:none;}"],r=t=>{const n=e[t].both?.defaultDuration||e[t].outgoing?.defaultDuration||e[t].incoming?.defaultDuration;return"forward"===t?n:n||r("forward")},o=t.duration||r(t.backward?"backward":"forward");void 0!==o&&n.push(`::view-transition-group(*){${ve}:${o};}`);const a=e=>Object.entries(e).map(([e,t])=>`${e}:${t};`).join("");return n.push(`::view-transition-old(root){${a(we(e,{...t,type:"outgoing"}))}}`,`::view-transition-new(root){${a(we(e,{...t,type:"incoming"}))}}`),n})(r,{backward:c(),duration:u.duration}).forEach(e=>i.sheet?.insertRule(e));const s=document.documentElement.classList;s.add(Ee);let l=!1;const d=()=>{l||(n(a),l=!0,s.remove(Ee))},f=()=>{t(!1),i.remove(),s.remove(Ee)};try{t(!0);const e=document.startViewTransition(d);t(e),e.finished.finally(f)}catch(e){console.error(e),d(),f()}}),!1)};e.on("prev",r(t=>e.prev({...t,[$e]:!0}),{back:!0,cond:e=>e.index>0&&!((e.fragment??1)&&n.fragmentIndex>0)})),e.on("next",r(t=>e.next({...t,[$e]:!0}),{cond:t=>t.index+1<e.slides.length&&!(n.fragmentIndex+1<n.fragments.length)})),setTimeout(()=>{e.on("slide",r(t=>e.slide(t.index,{...t,[$e]:!0}),{cond:t=>{const n=e.slide();return t.index!==n&&(t.back=t.index<n,!0)}}))},0),e.on("fragment",e=>{n=e})};let Ie;const Me=()=>(void 0===Ie&&(Ie="wakeLock"in navigator&&navigator.wakeLock),Ie),Oe=async()=>{const e=Me();if(e)try{return await e.request("screen")}catch(e){console.warn(e)}return null},Ae=async()=>{if(!Me())return;let e;const t=()=>{e&&"visible"===document.visibilityState&&Oe()};for(const e of["visibilitychange","fullscreenchange"])document.addEventListener(e,t);return e=await Oe(),e};((e=document.getElementById(":$p"))=>{(()=>{const e=p("view");a.dataset.bespokeView=e===l||e===c?e:""})();const t=(e=>{const t=p(e);return v({[e]:void 0}),t})("sync")||void 0;o.from(e,((...e)=>{const t=d.findIndex(e=>g()===e);return e.map(([e,n])=>e[t]&&n).filter(e=>e)})([[1,1,0],re({key:t})],[[1,1,1],Z(e)],[[1,1,0],M],[[1,1,1],k],[[1,0,0],T()],[[1,1,1],O],[[1,1,1],ne({history:!1})],[[1,1,0],A()],[[1,1,0],P],[[1,0,0],ee],[[1,1,0],le()],[[1,0,0],C()],[[1,0,0],Te],[[1,1,1],$],[[1,1,0],Ae]))})()}();</script></body></html>
