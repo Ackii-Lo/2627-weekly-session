@@ -98,11 +98,11 @@ Computer Psycho Union · 30 October 2026
 
 ## What we will cover
 
-1. Version history you already know *Feishu · Word · WPS*
-2. Stage and commit in VS Code *GUI only, no commands*
-3. What a commit really is *snapshots and fingerprints*
-4. Branches and merging *when history forks*
-5. Git and GitHub *push · fetch · pull · stash*
+1. Version history you already know *- Feishu · Word · WPS*
+2. Stage and commit in VS Code *- user-friendly GUI*
+3. What a commit really is *- snapshots and fingerprints*
+4. Branches and merging *- when history forks*
+5. Git and GitHub *- push · fetch · pull · stash*
 
 ---
 
@@ -119,6 +119,22 @@ Why Git exists · how a commit is born · your first commit
 
 ---
 
+<!-- Regular content page: mermaid below the text -->
+
+## 01 · The old-school way
+
+- **Save-as forever** — every "final" version is a new file
+- **Copy the folder** — `project_backup_before_refactor/`
+- **Which one is real? What changed? How do I go back?**
+
+```mermaid
+%%{init: {"themeVariables": {"fontSize": "14px"}}}%%
+graph LR
+  A["main.py"] --> B["main_old.py"] --> C["main_new.py"] --> D["main_final.py"] --> E["main_final_really_final.py"]
+```
+
+---
+
 <!-- _class: side -->
 <!-- Feishu screenshot is landscape: pinned LEFT (mirrored layout), width directive -->
 
@@ -132,9 +148,9 @@ section.side img {
 }
 </style>
 
-![width:560px](assets/feishu.png)
+![width:610px](assets/feishu.png)
 
-## 01 · Version history that YOU ALREADY KNOW
+## 02 · Version history that YOU ALREADY KNOW
 
 ### THE PANEL YOU NEVER NAMED
 
@@ -152,34 +168,17 @@ Autosave plus version history — mistakes become reversible.
 
 <!-- Regular content page: landscape image below the text -->
 
-## 02 · Why code needs its own tool
+## 03 · Why code needs its own tool
 
 - **A project is a forest** — hundreds of files and folders, not one document
 - **Locked to a product** — offline it is gone, no self-hosting
+  - *UNNC Living outage: 1000 lines of online edits overwritten*
 - **No parallel tries** — no way to keep two versions alive at once
 - **Merging** — two people, one file: code auto-merges most of it
 
-![w:1080](assets/project-forest.png)
+![w:1000](assets/project-forest.png)
 
 *Version control solves the same problem — for code.*
-
----
-
-<!-- Regular content page: mermaid below the text -->
-
-## 03 · The old-school way
-
-- **Save-as forever** — every "final" version is a new file
-- **Copy the folder** — `project_backup_before_refactor/`
-- *Which one is real? What changed? How do I go back?*
-
-```mermaid
-%%{init: {"themeVariables": {"fontSize": "14px"}}}%%
-graph LR
-  A["main.py"] --> B["main_old.py"] --> C["main_new.py"] --> D["main_final.py"] --> E["main_final_really_final.py"]
-```
-
-**Version control manages change and history — not backups.**
 
 ---
 
@@ -263,7 +262,7 @@ Stage (+) picks what the next commit contains. Your one-click commit was staging
 - **`.git`** — the hidden folder where the whole history lives - *never edit it, never commit it*
 - *In VS Code: create `.gitignore` in the repo root — those files vanish from Changes*
 
-![w:760](assets/gitignore.png)
+![w:900](assets/gitignore.png)
 
 ---
 
@@ -276,6 +275,7 @@ Stage (+) picks what the next commit contains. Your one-click commit was staging
 - **Plus a note** — who, when, what and why
 
 ```mermaid
+%%{init: {"flowchart": {"subGraphTitleMargin": {"top": 4, "bottom": 18}}}}%%
 graph LR
   subgraph CA["Commit A — snapshot + note"]
     F1["main.py"]
@@ -287,8 +287,6 @@ graph LR
   end
   CA -.-> CB
 ```
-
-*A commit = a snapshot + a message.*
 
 ---
 
@@ -327,7 +325,7 @@ graph LR
 
 <!-- Regular content page: mermaid below the text -->
 
-## 12 · A branch is a movable bookmark
+## 12 · A Branch -> a movable bookmark
 
 - A branch is **not a copy** of the project — it is a bookmark on a commit
 - Creating and moving it costs almost nothing
@@ -345,7 +343,7 @@ graph LR
 ## 13 · HEAD: where you stand
 
 - **HEAD** — the bookmark you are currently standing on
-- It decides where your next commit lands - *VS Code status bar, bottom-left*
+- It decides where your next commit lands
 
 ```mermaid
 graph TD
@@ -378,24 +376,31 @@ Everyone leaves this room with one commit on their machine
 
 ### 1 · SIGN IN
 
-Account icon (bottom-left) → Sign in with GitHub → authorize in the browser.
+- Account icon (bottom-left)
+- Sign in with GitHub
+- Authorize in the browser.
 
 ### 2 · INIT
 
-New folder `git-practice` → open in VS Code → Source Control view → click Initialize Repository.
+- New folder `git-practice`
+- Open in VS Code, go `Source Control`
+- Click `Initialize Repository`
 
 </div>
 <div class="column">
 
 ### 3 · COMMIT
 
-Create `main.py` → stage → `Initial commit` → find it in the graph.
+- Create `main.py`
+- Stage ALL + `Initial commit` + Commit
+- Find your commit in the graph.
 
 <br/>
 
 ### 4 · FEEL THE STAGE
 
-Two files, two commits — you choose what each one contains.
+Two files & two commits.
+You choose what each one contains.
 
 </div>
 </div>
