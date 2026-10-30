@@ -275,17 +275,25 @@ Stage (+) picks what the next commit contains. Your one-click commit was staging
 - **Plus a note** — who, when, what and why
 
 ```mermaid
-%%{init: {"flowchart": {"subGraphTitleMargin": {"top": 4, "bottom": 18}}}}%%
 graph LR
   subgraph CA["Commit A — snapshot + note"]
+    direction TB
+    PA["#8203;"]:::pad
     F1["main.py"]
     F2["utils.py"]
+    PA ~~~ F1
+    PA ~~~ F2
   end
   subgraph CB["Commit B — snapshot + note"]
-    G1["main.py"]
-    G2["utils.py"]
+    direction TB
+    PB["#8203;"]:::pad
+    G1["main.py*"]
+    G2["utils.py*"]
+    PB ~~~ G1
+    PB ~~~ G2
   end
   CA -.-> CB
+  classDef pad fill:none,stroke:none,color:none
 ```
 
 ---
@@ -392,7 +400,7 @@ Everyone leaves this room with one commit on their machine
 ### 3 · COMMIT
 
 - Create `main.py`
-- Stage ALL + `Initial commit` + Commit
+- Stage all + `Initial commit` + Commit
 - Find your commit in the graph.
 
 <br/>
@@ -530,9 +538,11 @@ graph LR
 
 Git refuses to guess which version you meant.
 
+<br/>
+
 ### YOU DECIDE
 
-Resolve, stage, commit — history moves on.
+Resolve, stage, commit - history moves on.
 
 #### RESOLVE
 
@@ -564,7 +574,10 @@ graph LR
   D -.->|"Undo Last Commit"| S["changes → Staged Changes"]
 ```
 
-*Unwrapping a commit loses nothing. Pushed already? Fix forward — rewriting shared history needs force push.*
+<br/>
+
+*Unwrapping a commit loses nothing.*
+*Pushed already? Fix forward — rewriting shared history needs force push.*
 
 ---
 
@@ -580,9 +593,9 @@ graph LR
 
 ```mermaid
 graph LR
-  L["Git — on your machine"]
-  GH["GitHub — in the cloud"]
-  L -.->|"Push / Pull — optional"| GH
+  L["Git — on your PC"]
+  GH["GitHub — cloud"]
+  L -.->|"Push / Pull"| GH
 ```
 
 - *Committing needs no internet*
@@ -597,9 +610,10 @@ graph LR
 | --- | --- | --- |
 | History lives | one central server | in every clone |
 | Commit offline | no | yes |
-| Server down | work stops | everyone still commits |
+| Server unreachable | no commits, no history | everyone still commits |
 
-- *SVN era: leave the office network, stop working. Git era: commit on a plane.*
+- *SVN: edits and diffs still work offline — committing and history need the server.*
+- *Git: the whole history is on your laptop — commit on a plane.*
 
 ---
 
@@ -614,10 +628,14 @@ graph LR
 ```mermaid
 graph LR
   R["your repository"]
-  O(["origin"])
-  GH["github.com/CompPsyUnion/2627-weekly-session"]
-  R --- O
-  O --- GH
+  O1(["upstream"])
+  O2(["origin"])
+  GH1["github/CPU/repo"]
+  GH2["github/YOU/repo"]
+  R --- O1
+  R --- O2
+  O1 --- GH1
+  O2 --- GH2
 ```
 
 ---
@@ -693,7 +711,7 @@ graph LR
 ## 30 · The whole picture
 
 ```mermaid
-flowchart TD
+flowchart LR
   EF["Edit Files"] --> WT["Working Tree"]
   WT -->|"+ Stage"| SA["Staging Area"]
   SA -->|"✓ Commit"| LR["Local Repository"]
