@@ -174,6 +174,7 @@ Autosave plus version history — mistakes become reversible.
 - *Which one is real? What changed? How do I go back?*
 
 ```mermaid
+%%{init: {"themeVariables": {"fontSize": "14px"}}}%%
 graph LR
   A["main.py"] --> B["main_old.py"] --> C["main_new.py"] --> D["main_final.py"] --> E["main_final_really_final.py"]
 ```
@@ -195,16 +196,12 @@ graph LR
 <div class="columns">
 <div class="column">
 
-![w:240](assets/logo-svn.svg)
-
-*SVN — centralized*
+![w:200](assets/logo-svn.webp)
 
 </div>
 <div class="column">
 
-![w:240](assets/logo-git.svg)
-
-*Git — distributed*
+![w:240](assets/logo-git.webp)
 
 </div>
 </div>
@@ -215,20 +212,19 @@ graph LR
 
 ## 05 · Two places, one click
 
-- **Working Tree** — the files you are editing *your desk*
-- **Local Repository** — the saved commit history *the archive*
+- **Working Tree** — the files you are editing - *your desk*
+- **Local Repository** — the saved commit history - *the archive*
 - **Demo** — edit `main.py` · type a message · Commit — a new commit exists
 
-![w:760](assets/ph-two-places.svg)
+![w:1000](assets/two-places.png)
 
 *Saving a file is not recording history. Committing is.*
 
 ---
 
 <!-- _class: side -->
-<!-- Side image: replace assets/ph-vscode-scm.svg with a real screenshot -->
 
-![height:700px](assets/ph-vscode-scm.svg)
+![height:740px](assets/vscode-scm.png)
 
 ## 06 · The hidden third place
 
@@ -253,7 +249,7 @@ Stage (+) picks what the next commit contains. Your one-click commit was staging
 - **Commit (check)** — write history with a message
 - *Fine-grained: stage single hunks in the diff view*
 
-![w:760](assets/ph-stage-commit.svg)
+![w:760](assets/stage-commit.png)
 
 **A commit is chosen, not dumped.**
 
@@ -263,11 +259,11 @@ Stage (+) picks what the next commit contains. Your one-click commit was staging
 
 ## 08 · Keep some files out of history
 
-- **`.gitignore`** — the list of files Git should pretend not to see *caches · builds · secrets*
-- **`.git`** — the hidden folder where the whole history lives *never edit it, never commit it*
+- **`.gitignore`** — the list of files Git should pretend not to see - *caches · builds · secrets*
+- **`.git`** — the hidden folder where the whole history lives - *never edit it, never commit it*
 - *In VS Code: create `.gitignore` in the repo root — those files vanish from Changes*
 
-![w:760](assets/ph-gitignore.svg)
+![w:760](assets/gitignore.png)
 
 ---
 
@@ -349,7 +345,7 @@ graph LR
 ## 13 · HEAD: where you stand
 
 - **HEAD** — the bookmark you are currently standing on
-- It decides where your next commit lands *VS Code status bar, bottom-left*
+- It decides where your next commit lands - *VS Code status bar, bottom-left*
 
 ```mermaid
 graph TD
@@ -394,6 +390,8 @@ New folder `git-practice` → open in VS Code → Source Control view → click 
 ### 3 · COMMIT
 
 Create `main.py` → stage → `Initial commit` → find it in the graph.
+
+<br/>
 
 ### 4 · FEEL THE STAGE
 
@@ -446,7 +444,7 @@ Branches · merging · conflicts · GitHub
 
 <!-- _class: side -->
 
-![height:685px](assets/ph-commit-graph.png)
+![height:685px](assets/commit-graph.png)
 
 ## 16 · When history forks
 
@@ -454,7 +452,7 @@ Branches · merging · conflicts · GitHub
 
 Keep one line stable, try ideas on another.
 
-### FORK AND MERGE
+### SEPARATE & MERGE
 
 History stops being a line and becomes a graph — a family tree, a river delta.
 
@@ -468,7 +466,7 @@ History stops being a line and becomes a graph — a family tree, a river delta.
 
 - **Try safely** — new algorithm on the side, the stable line untouched
 - **Nothing is copied** — a branch is just another bookmark
-- **In VS Code** — click the branch name (bottom-left) → Create Branch
+- **How?** — Source Control → click the branch name (top-right) → Create Branch
 <br/>
 
 ![width:1050](assets/branches.png)
@@ -518,9 +516,8 @@ graph LR
 ---
 
 <!-- _class: side -->
-<!-- Side image: replace assets/ph-conflict.svg with a real screenshot -->
 
-![height:720px](assets/ph-conflict.svg)
+![height:620px](assets/conflict.png)
 
 ## 20 · Conflicts are not errors
 
@@ -543,7 +540,7 @@ Resolve, stage, commit — history moves on.
 - **Discard (undo arrow)** — drop changes you never staged
 - **Unstage (minus)** — take things out of the next commit
 
-![w:760](assets/ph-discard.svg)
+![w:960](assets/discard.png)
 
 *Both live on the file rows in Source Control — hover to see them.*
 
@@ -621,9 +618,8 @@ graph LR
 ---
 
 <!-- _class: side -->
-<!-- Side image: replace assets/ph-pushpull.svg with a real screenshot -->
 
-![height:720px](assets/ph-pushpull.svg)
+![height:550px](assets/pushpull.png)
 
 ## 26 · Push: publish your commits
 
@@ -746,19 +742,6 @@ Visit `github.com/<your-username>` — your commit is there.
 
 ---
 
-<!-- _class: yellow -->
-<!-- Closing page -->
-
-## THANK YOU
-
-### Q&A
-
-#### Start Your History Today
-
-Siyuan He (Robert) · Computer Psycho Union · 30 October 2026
-
----
-
 <!-- _class: todo -->
 <!-- Appendix: force push setting, referenced from the talk -->
 
@@ -773,3 +756,20 @@ Settings → search `force push` → enable Git: Allow Force Push.
 Keep Use Force Push With Lease on — it refuses to overwrite unseen commits.
 
 - Full course notes — `Session-1/` and `Session-2/` in this folder
+
+<br/>
+<br/>
+<br/>
+
+---
+
+<!-- _class: yellow -->
+<!-- Closing page -->
+
+## THANK YOU
+
+### Q&A
+
+#### Start Your History Today
+
+Siyuan He (Robert) · Computer Psycho Union · 30 October 2026
