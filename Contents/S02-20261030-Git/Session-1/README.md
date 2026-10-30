@@ -6,9 +6,11 @@
 
 先理解 **我们为什么需要一种专门的工具来记录代码的变化？**
 
-## Part 1 — The Problem: What Does Version Control Actually Solve?（0–10 min）
+讲义按 PPT 分页：每个 `##` 是一个 Part，每个 `###` 对应一页幻灯片（编号与标题一致）。
 
-### 没有专门工具时的土办法
+## Part 1 — The Problem（0–10 min）· slides 01–04
+
+### 01 · The old-school way
 
 假设你正在开发一个 Python 项目。
 
@@ -57,7 +59,7 @@ project_backup_after_refactor/
 - 随着项目规模扩大，备份会越来越笨重。
 - 不同版本之间的关系并不清晰。
 
-### 先从你每天在用的“版本管理”说起
+### 02 · Version history that YOU ALREADY KNOW
 
 > 飞书文档、金山文档、Word 里那个“历史版本”功能，你用过吗？
 
@@ -71,7 +73,7 @@ project_backup_after_refactor/
 
 > **“历史版本”记录的就是你中间改了什么东西——Git 要解决的正是同一类问题，只不过对象是代码。**
 
-### 那代码为什么不能直接用它们？
+### 03 · Why code needs its own tool
 
 看起来在线文档已经把问题解决了，但把同样的需求放到代码项目上，很快会遇到新情况：
 
@@ -83,7 +85,7 @@ project_backup_after_refactor/
 
 所以程序员需要一个**属于代码的、不依赖某个云服务的版本管理工具**——版本控制系统（Version Control System）。
 
-### 引出 Git（顺带认识一下 SVN）
+### 04 · Meet Git (and its ancestor SVN)
 
 版本控制系统不止一种。早年的 CVS、SVN 是**集中式**的代表：所有历史放在一台中央服务器上，提交必须连着它——那也是“离开公司网络就干不了活”的时代。Git 则是**分布式**的代表：每个仓库自带完整历史，两者的具体对比放在第二节讲 GitHub 时展开。
 
@@ -99,13 +101,9 @@ Git 由 Linus Torvalds 在 2005 年为开发 Linux 内核而创建，如今几�
 
 **在线文档的“历史版本”和 Git 解决的是同一类问题——管理变化和历史；只是代码需要一个更专业、更自由的工具。**
 
----
+## Part 2 — Git's Mental Model（10–25 min）· slides 05–08
 
-## Part 2 — Git's Mental Model: Three Places, Three Different Roles（10–25 min）
-
-这一部分介绍最重要的本地工作流。
-
-### 2.1 先认识两个区域：Working Tree 与 Local Repository
+### 05 · Two places, one click
 
 从一个动作开始：你修改了 `main.py`，并保存了文件。
 
@@ -128,9 +126,9 @@ Git 由 Linus Torvalds 在 2005 年为开发 Linux 内核而创建，如今几�
 
 修改文件并保存，只是改变了 Working Tree；只有点击 **✓ Commit** 创建提交之后，这个状态才进入 Local Repository 的历史。
 
-不过，这个“直接提交”的一步里其实藏着一点细节——先记住这个疑问，下一节从一个新的需求出发揭晓它。
+不过，这个“直接提交”的一步里其实藏着一点细节——先记住这个疑问，下一页从一个新的需求出发揭晓它。
 
-### 2.2 需求出现：只提交一部分修改——引出 Staging Area
+### 06 · The hidden third place
 
 这里值得多花一点时间。
 
@@ -154,7 +152,7 @@ README.md
 
 这正是第三个区域存在的原因——**Staging Area（暂存区，也叫 Index）**：准备纳入下一次提交的内容，可以理解为**下一份提交的草稿**。它位于工作台和档案柜之间：先挑选要归档的内容放进草稿，再统一写入历史。
 
-回头再看上一节的演示：点击 **✓ Commit** 时， `Changes` 列表里还有未暂存的内容，VSCode 其实替你多做了一步——先把它们放进暂存区（对应 `git add`），再创建提交（对应 `git commit`）。暂存区一直都在，只是被“直接提交”的便利藏在了幕后；当你需要只提交一部分修改时，它才走到台前。
+回头再看上一页的演示：点击 **✓ Commit** 时， `Changes` 列表里还有未暂存的内容，VSCode 其实替你多做了一步——先把它们放进暂存区（对应 `git add`），再创建提交（对应 `git commit`）。暂存区一直都在，只是被“直接提交”的便利藏在了幕后；当你需要只提交一部分修改时，它才走到台前。
 
 在 VSCode 中，这只意味着：只点击 `main.py` 旁边的 **+**（只暂存这一个文件），然后输入 `Fix input validation`，点击 **✓ Commit** 提交。
 
@@ -164,7 +162,9 @@ README.md
 
 这相当于按块、按范围挑选要进入下一次提交的内容。
 
-### 2.3 用一个具体例子验证理解
+### 07 · Edit, stage, commit
+
+用一个具体例子验证理解。
 
 假设 `main.py` 原本是：
 
@@ -198,11 +198,7 @@ print("Hello, Git")
 
 因为点击 **+** 的那一刻，当时的文件内容已经进入暂存区，之后的修改不会自动更新暂存区。
 
-这非常适合做一次简短的互动提问。
-
-它能直接帮助学生理解为什么“暂存”和“提交”是两个独立步骤。
-
-### 2.4 需求出现：有些文件不该进入历史
+### 08 · Keep some files out of history
 
 完成几次提交后，很快会发现两类“不该被记录”的东西：
 
@@ -224,25 +220,9 @@ __pycache__/
 
 要判断某个文件夹是否是一个 Git 仓库的重要线索也是看本文件夹下是否有一个 `.git` 目录。如果你想把一个普通文件夹变成一个被 Git 追踪历史的特殊文件夹，只需要在该目录下运行一个 Git 的内置命令 `git init` 或者在 vscode 打开一个文件夹之后在 `Source Control` 面板点击 `Initialize Repository` 按钮即可。
 
-### 本部分的核心结论
+## Part 3 — What Is a Commit, Really?（25–33 min）· slides 09–10
 
-```text
-Edit → Stage → Commit
-```
-
-它们分别对应：
-
-```text
-修改文件 → 选择提交内容 → 创建历史记录
-```
-
-在 VSCode 中，这三步分别对应：在编辑器中修改文件 → Source Control view 中点击 **+** → 输入提交信息后点击 **✓ Commit**。
-
-建议让学生把这个模型记住，而不是先记住十几个操作。
-
----
-
-## Part 3 — What Is a Commit, Really?（25–33 min）
+### 09 · What a commit really is
 
 这一部分只回答一个问题，点到为止，不展开内部实现。
 
@@ -274,6 +254,8 @@ README.md
 
 这三个文件在那一刻的样子。你修改了 `main.py` 后创建 Commit B，它记录的又是新一刻的完整样子。
 
+### 10 · The commit ID is a fingerprint
+
 每次提交还会自动附上：作者、时间、你填写的提交说明，以及一个像指纹一样的提交 ID（比如 `a1b2c3d`）。
 
 提交 ID 来自一次**哈希（hash）运算**：把内容交给一个固定的函数，算出一串定长的字符串。记住哈希的三个特性即可：
@@ -288,13 +270,11 @@ README.md
 
 > Git 记录的是“项目每个时刻长什么样”，而不是“你敲过的每一步操作”。
 
----
-
-## Part 4 — History, References, and "Where Am I"?（33–41 min）
+## Part 4 — History, References, and "Where Am I"?（33–41 min）· slides 11–13
 
 这一部分为第二节做铺垫，只保留三个最实用的结论：历史是一条链、分支是一张书签、HEAD 标记你现在的位置。
 
-### 4.1 提交连成一条历史
+### 11 · History is a line
 
 每创建一次提交，它都会接在上一次提交的后面，于是项目历史像一条链一样不断向前生长：
 
@@ -307,7 +287,7 @@ graph LR
 
 到目前为止，这条线都是直的。它什么时候会“岔开”？岔开之后又怎么合回来？——这是第二节的开场问题，先卖个关子。
 
-### 4.2 分支：一张写着“当前进展”的书签（Reference）
+### 12 · A Branch -> a movable bookmark
 
 仓库里可以同时存在很多提交，Git 需要一种方式标记“值得指认的那些提交”。答案是引用（reference）：**一张贴在某个提交上、可以随时挪动的“书签”**。
 
@@ -334,7 +314,7 @@ graph LR
 
 一句话：**分支就是贴在某个提交上的书签，创建和移动它几乎零成本。**
 
-### 4.3 还剩一个问题：你本人现在在哪个分支上？
+### 13 · HEAD: where you stand
 
 分支和引用都可以有很多个，于是还剩最后一个问题：**你本人现在站在哪个分支上？** 换句话说，下次点击 **✓ Commit** 创建的提交会落到哪个分支？
 
@@ -354,28 +334,19 @@ graph TD
 
 这里可以只介绍概念，不必深入 detached HEAD 等特殊状态。
 
-### Session 1 核心结论
+## Part 5 — Hands-on（41–50 min）· slides 14–15
 
-- 一次提交 = 项目快照 + 一条“改了什么”的说明。
-- 提交连成历史，分支是书签，HEAD 标记你现在的位置。
-
-记住这三句话，第二节的一切都会顺理成章。
-
----
-
-## Part 5 — 动手环节：登录 GitHub，完成第一次提交（41–50 min）
+### 14 · Fifteen minutes, four steps
 
 这一部分留出真正的上机时间，目标只有一个：**每个人现场完成自己的第一次 Commit。**
 
-### 5.0 前置检查：电脑上还没装 Git 怎么办（约 2 分钟）
-
-大部分同学打开 VSCode 后 Source Control view 就能直接用；如果它提示 “Download Git” 或弹出 “Git not found. Would you like to install Git?”，说明系统里还没有 Git。
+前置检查：电脑上还没装 Git 怎么办（约 2 分钟）——大部分同学打开 VSCode 后 Source Control view 就能直接用；如果它提示 “Download Git” 或弹出 “Git not found. Would you like to install Git?”，说明系统里还没有 Git。
 
 1. 直接点击提示中的 **Download Git** / **Install** 按钮，按提示一步步装完；macOS 若弹出“需要安装命令行开发者工具”的对话框，点“安装”即可，里面自带 Git。
 2. 装完后按提示**重启 VSCode**。
 3. 重新打开 Source Control view，不再出现该提示，就说明 Git 已就绪。
 
-### 5.1 准备：在 VSCode 中登录 GitHub（约 3 分钟）
+准备：在 VSCode 中登录 GitHub（约 3 分钟）：
 
 1. 点击 VSCode 左下角的账户头像图标 → “Sign in with GitHub”。
 2. 浏览器会打开 GitHub 授权页面，登录并点击 **Authorize visual-studio-code**。
@@ -383,7 +354,7 @@ graph TD
 
 登录之后，VSCode 可以直接以你的身份发布、克隆仓库——第二节推送时不再需要现场折腾认证。
 
-### 5.2 创建仓库并完成第一次提交（约 5 分钟）
+创建仓库并完成第一次提交（约 5 分钟）：
 
 1. 在电脑上你喜欢的位置新建文件夹 `git-practice`，在 VSCode 中打开：文件 → 打开文件夹。
 2. 打开 Source Control view，点击“Initialize Repository”按钮。
@@ -391,13 +362,22 @@ graph TD
 4. 消息框输入 `Initial commit`，点击 **✓ Commit**。
 5. 打开提交图（**···** → “View Commit Graph”），找到自己刚创建的第一个提交；点击 `Changes` 里的文件还能打开 diff view。
 
-### 5.3 再来一次，体会暂存区（约 1 分钟，时间允许时）
+再来一次，体会暂存区（约 1 分钟，时间允许时）：
 
 - 修改 `main.py`，再新建一个 `notes.md`。
 - 这次先只点 `main.py` 旁的 **+** 暂存并提交，再单独暂存提交 `notes.md`。
 - 提交图里出现两次提交——这就是“自己挑选下一次提交包含什么”。
 
-### 5.4 下课前三个问题
+### 15 · Before the break
+
+Session 1 核心结论：
+
+- 一次提交 = 项目快照 + 一条“改了什么”的说明。
+- 提交连成历史，分支是书签，HEAD 标记你现在的位置。
+
+记住这三句话，第二节的一切都会顺理成章。
+
+下课前三个问题：
 
 1. 为什么“暂存”和“提交”是两个不同的步骤？
 2. 一次提交里保存的是什么——是你的每一步操作，还是项目那一刻的样子？
@@ -407,4 +387,4 @@ graph TD
 
 > Git records snapshots, connects them into history, and gives us ways to navigate that history.
 
-走动帮同学排障，常见问题：没装 Git（按 5.0 点提示按钮装好并重启）、GitHub 没登录成功、文件夹没有在 VSCode 中打开、误把整个主目录初始化成仓库。没跟上的同学可以课后照着 5.0–5.2 补齐，或到仓库 issue 提问。
+走动帮同学排障，常见问题：没装 Git（按前置检查点提示按钮装好并重启）、GitHub 没登录成功、文件夹没有在 VSCode 中打开、误把整个主目录初始化成仓库。没跟上的同学可以课后照着 14 页的步骤补齐，或到仓库 issue 提问。
