@@ -1437,7 +1437,7 @@ VSCode 操作：
 
 ```mermaid
 graph LR
-  W["uncommitted changes"] -.->|"1 · Stash"| ST["on the shelf"]
+  W["uncommitted files"] -.->|"1 · Stash"| ST["on the shelf"]
   R["remote updates"] -->|"2 · Pull"| L["your history"]
   ST -.->|"3 · Pop"| W2["changes are back"]
 ```
